@@ -1,0 +1,89 @@
+#!/bin/bash
+
+
+# magnet scraper and torrent streamer
+
+
+# music player
+
+mp() {
+
+  type=music
+  $(play "$*" > /dev/null &)
+
+}
+
+
+# video player
+
+vp() {
+
+  type=video
+  $(play "$*" > /dev/null &)
+
+}
+
+
+# launch video via VLC
+
+startvideo() {
+
+  if [[ $(whoami) == "tyra" ]]; then
+    mpv "$1" &
+  else
+    $(am start --user 0 -a android.intent.action.VIEW -t video/mpeg -d "$1" > /dev/null 2>&1 &)
+  fi
+
+}
+
+
+# play music via VLC
+
+startaudio() {
+
+  if [[ $(whoami) == "tyra" ]]; then
+    mpv "$1" &
+  else
+    $(am start --user 0 -a android.intent.action.VIEW -t audio/wav -d "$1" > /dev/null 2>&1 &)
+  fi
+
+}
+
+
+# retrieve url of media source
+
+geturl() {
+
+  out=$(yt-dlp --get-url "$1")
+  if [[ -n "$out" ]]; then
+    echo "$out"
+  fi
+
+}
+
+
+# plays youtube links or queries
+
+play() {
+
+  url="$1"
+  if [[ -z "$1" ]]; then
+    startvideo "http://localhost:8888/"
+    return
+  elif [[ ! "$1" == *"."* ]]; then
+    query=$(printf '%s' "$*" | tr ' ' '+' )
+    id=$(curl -sL "https://m.youtube.com/results?search_query=$query&sp=EgQQASAB" \
+    | egrep -o "\"videoId\":\"[a-zA-Z0-9]{11}\"" \
+    | head -n 1 | egrep -o "[a-zA-Z0-9]{11}")
+    url=$(echo "https://m.youtube.com/watch?v=$id")
+    echo "$url"
+  fi
+  if [[ "$type" == "video" ]]; then
+    url=$(yt-dlp -f b -g "$1")
+    startvideo "$url"
+  elif [[ "$type" == "music" ]]; then
+    url=$(yt-dlp -g "$1" | tail -n 1)
+    startaudio "$url"
+  fi
+
+}

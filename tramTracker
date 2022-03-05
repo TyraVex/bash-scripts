@@ -1,0 +1,109 @@
+#!/bin/bash
+
+
+tram() {
+
+  # initialisation
+  unset schedules
+  db=("" "lille flandres" "lille europe" "romarin" "botanique" "saint maur" "buisson" "brossolette" "clemenceau hipp." "croise laroche" "foch" "le quesne" "cerisaie" "chateau rouge" "cartelot" "grand cottignies" "triez" "trois suisses" "faidherbe" "ma campagne" "pont hydraulique" "victoire" "tourcoing centre" "acacias" "pont wasquehal" "la terrasse" "pave de lille" "le sart" "planche epinoy" "la marque" "villa cavrois" "bol d'air" "parc barbieux" "hopital v.provo" "jean moulin" "alfred mongy" "euroteleport")
+  readarray -t currenttime <<< $(tr ':' '\n' <<< $(date +%T))
+  if [[ -z "$1" || -z "$2" || "$1" == "-h" || "$1" == "--help" ]]; then
+    tramhelp
+    return
+  fi
+
+  # analysing input
+  case "$1" in
+    "tourcoing" | "t") direction="tourcoing centre";;
+    "lille" | "l") direction="lille flandres";;
+    *) tramhelp; return
+  esac
+
+  for ((i=1; i < 36; i++)); do
+    station=$(grep -i "${*:2}" <<< "${db[i]}")
+    if [[ -n "$station" ]]; then
+      break
+    fi
+  done
+
+  if [[ -z "$station" ]]; then tramhelp; return; fi
+
+  # sending request
+  echo "$station > $direction"
+  station=$(printf '%s' "$station" | tr ' ' '+' | tr '[:lower:]' '[:upper:]')
+  direction=$(printf '%s' "$direction" | tr ' ' '+' | tr '[:lower:]' '[:upper:]')
+  readarray -t schedules <<< $(curl -s "https://opendata.lillemetropole.fr/api/records/1.0/search/?dataset=ilevia-prochainspassages&timezone=CET&refine.nomstation=$station&refine.sensligne=$direction" \
+  | jq | grep "heureestimeedepart" | egrep -o '[0-9]{2}:[0-9]{2}:[0-9]{2}')
+
+
+  # watchdog
+  if [[ -z "$schedules" ]]; then
+    echo "Service down or wrong station name"
+    return
+  fi
+
+
+  # analysing / exploiting response
+  for ((i=0; i < "${#schedules[@]}"; i++)); do
+    readarray -t tramtime <<< $(tr ':' '\n' <<< "${schedules[i]}")
+    currentsec=$(("${currenttime[0]#0} * 3600 + ${currenttime[1]#0} * 60 + ${currenttime[2]#0}"))
+    tramsec=$(("${tramtime[0]#0} * 3600 + ${tramtime[1]#0} * 60 + ${tramtime[2]#0}"))
+    if (( "$tramsec" < "$currentsec" )); then
+      ((tramsec+=86400))
+    fi
+    deltasec=$(("$tramsec" - "$currentsec"))
+    if (( "$deltasec" > 43200 )); then
+      echo "${schedules[i]} > Alredy happened"
+    else
+      minutes=$(("$deltasec" / 60))
+      seconds=$(("$deltasec" % 60))
+      if (( "$minutes" < 10 )); then
+        minutes="0$minutes"
+      fi
+      if (( "$seconds" < 10 )); then
+        seconds="0$seconds"
+      fi
+      echo "${schedules[i]} > In $minutes:$seconds"
+    fi
+  done
+
+}
+
+
+tramhelp() {
+
+  echo
+  echo "usage : tram <direction> <station>"
+  echo
+  echo "      lille flandres | 1"
+  echo "        lille europe | 2"
+  echo "             romarin | 3"
+  echo "           botanique | 4"
+  echo "          saint maur | 5"
+  echo "             buisson | 6"
+  echo "         brossolette | 7"
+  echo "    clemenceau hipp. | 8"
+  echo "      croise laroche | 9"
+  echo "                  ___|___"
+  echo "                 |       |"
+  echo "            foch | 10 23 | acacias"
+  echo "       le quesne | 11 24 | pont wasquehal"
+  echo "        cerisaie | 12 25 | la terrasse"
+  echo "   chateau rouge | 13 26 | pave de lille"
+  echo "        cartelot | 14 27 | le sart"
+  echo "grand cottignies | 15 28 | planche epinoy"
+  echo "           triez | 16 29 | la marque"
+  echo "   trois suisses | 17 30 | villa cavrois"
+  echo "       faidherbe | 18 31 | bol d'air"
+  echo "     ma campagne | 19 32 | parc barbieux"
+  echo "pont hydraulique | 20 33 | hopital v.provo"
+  echo "        victoire | 21 34 | jean moulin"
+  echo "tourcoing centre | 22 35 | alfred mongy"
+  echo "                      36 | euroteleport"
+  echo
+  echo "directions :"
+  echo " - lille / l"
+  echo " - tourcoing / t"
+  echo
+
+}

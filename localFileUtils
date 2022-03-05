@@ -1,0 +1,63 @@
+#!/bin/bash
+
+
+# initialisation
+ub=/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/ubuntu/root
+if [[ -d /sdcard/Download/ && ! -d /sdcard/Download/Shared ]]; then
+  mkdir /sdcard/Download/Shared
+fi
+
+# backup (TERMUX-WSL)
+alias bkp=' \
+  if [[ -d /sdcard/Download/Shared ]]; then \
+    zip -q -r /sdcard/Download/Shared/backup.zip ~/ "$ub"/; \
+  else \
+    zip -q -r ~/backup.zip ~/; \
+  fi \
+'
+
+# share files TO vm (PROOT-DISTRO)
+shrvm() {
+  cp -r "$1" "$ub"/
+}
+
+# get files FROM vm (PROOT-DISTRO)
+getvm() {
+  cp -r "$ub"/"$1" ~/
+}
+
+# shares files0 TO Shared folder (TERMUX)
+shr() {
+  if [[ -d /sdcard/Download/Shared ]]; then
+    cp -r "$1" /sdcard/Download/Shared
+  else
+    echo "Feature only supported on termux"
+  fi
+}
+
+# get files FROM Shared folder (TERMUX)
+get() {
+  if [[ -d /sdcard/Download/ ]]; then
+    cp -r /sdcard/Download/"$1" ./
+  else
+    echo "Feature only supported on termux"
+  fi
+}
+
+# move files TO Shared folder (TERMUX)
+shrmv() {
+  if [[ -d /sdcard/Download/Shared ]]; then
+    mv "$1" /sdcard/Download/Shared/;
+  else
+    echo "Feature only supported on termux"
+  fi
+}
+
+# move files FROM Shared folder (TERMUX)
+getmv() {
+  if [[ -d /sdcard/Download/ ]]; then
+    mv /sdcard/Download/"$1" ./
+  else
+    echo "Feature only supported on termux"
+  fi
+}

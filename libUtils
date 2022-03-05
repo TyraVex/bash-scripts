@@ -1,0 +1,111 @@
+#!/bin/bash
+
+
+# colors
+
+NC='\e[0m'
+red='\e[31m'
+green='\e[32m'
+yellow='\e[33m'
+blue='\e[34m'
+
+# url formatter
+
+url() {
+
+  if [[ ! "$1" == *"http"* ]]; then
+    input=`echo https://"$1"`
+  else
+    input="$1"
+  fi
+  echo "$input"
+  am start --user 0 -a android.intent.action.VIEW \
+  -d "$input" > /dev/null
+
+}
+
+
+# minecraft account checker
+
+acc() {
+
+  acc=(${1//:/ })
+  request="$(\
+    curl -s -m 10 \
+    -H "Accept:application/json" \
+    -H "content-Type:application/json" \
+    https://authserver.mojang.com/authenticate \
+    -X POST --data '{"username": "'${acc[0]}'", "password": "'${acc[1]}'"}' \
+    | head -c 3
+  )"
+  if [[ "$request" == "{\"c" ]]; then
+    echo "> hit"
+  else
+    echo "> bad"
+  fi
+
+}
+
+
+# server launcher (TERMUX-WSL)
+
+alias serv=' \
+  cd ~/.temp/server/; \
+  if [[ $(whoami) == "tyra" ]]; then \
+    java -jar -Xms2048M -Xmx2048M paper.jar; \
+  else \
+    proot java -jar -Xms256M -Xmx256M server.jar; \
+    cd ~/; \
+  fi \
+'
+
+
+# synchronize a git repo
+
+sync() {
+
+  if [[ -z "$1" ]]; then
+    toSync="."
+  else
+    toSync="$1"
+  fi
+  git commit -m "update" "$toSync"
+  git push origin main
+  git pull origin main -f
+
+}
+
+sy() {
+
+  sync ~/.bashrc
+
+}
+
+
+# googler
+
+g() {
+
+  query=$(printf '%s' "$*" | tr ' ' '+' )
+  lynx --cookies "https://www.google.com/search?q=$query"
+
+}
+
+
+# c compile + auto rename outout
+
+cc() {
+
+  name=$(echo "$1" | grep -Po '.*(?=\.)')
+  clang "$1" -o "$name".exe
+
+}
+
+
+# get ip config
+
+myip() {
+
+  ip a | egrep -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | sort | uniq -u
+
+}

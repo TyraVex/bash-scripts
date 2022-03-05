@@ -1,0 +1,42 @@
+#!/bin/bash
+
+
+# file uploader
+
+up() {
+  curl -s -F "file=@$1" https://api.anonfiles.com/upload \
+  | egrep -o "https:\/\/anonfiles\.com\/[a-zA-Z0-9]{10}" | head -n 1
+}
+
+
+# url shortener
+
+short() {
+
+  # analysing input
+  if [[ ! "$1" == *"http"* ]]; then
+    input=$(echo https://"$1")
+  else
+    input="$1"
+  fi
+  input=$(sed 's/[/*^$]/\\&/g' <<< "$input")
+  echo "$input"
+
+
+  # sending request + retrieving url
+  output=$(curl -s --location --request POST 'https://u.nu/api/url/add' \
+  --header 'Authorization: Bearer $UNU_API_KEY' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{ "url": "'$input'" }' \
+  | egrep -o "https:[\][/][\][/]u\.nu[\][/][a-zA-Z]{5}" | tr -d '\\')
+  echo "$output"
+
+
+  # logging url
+  if [[ -f "$2" ]]; then
+   printf "$2 > $output\n" >> ~/.temp/urls
+  else
+   printf "$1 > $output\n" >> ~/.temp/urls
+  fi
+
+}

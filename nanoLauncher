@@ -1,0 +1,48 @@
+#!/bin/bash
+
+n() {
+
+  # initialisation
+  hPos=1
+  touch ~/.temp/last_nano
+  detectIncrement=$(egrep -o "\-inc" <<< "$*")
+  if [[ -z "$detectIncrement" ]]; then
+    inc=1
+  fi
+
+  # detecting arguments
+  detectHistory=$(egrep -o "\-h [0-9]*" <<< "$*" | egrep -o "[0-9]+")
+  if [[ -n "$detectHistory" ]]; then
+    hPos="$detectHistory"
+  fi
+
+  # removing arguments from input
+  cleanedInput=$(sed 's:-h [0-9]*::g' <<< "$*" | sed 's: $::g' | sed 's:^ ::g')
+  cleanedInput=$(sed 's:-h::g' <<< "$cleanedInput")
+  cleanedInput=$(sed 's:-inc::g' <<< "$cleanedInput")
+  last_nano=$(tail -n "$hPos" ~/.temp/last_nano | head -n 1)
+
+  # launching target
+  if [[ -n "$cleanedInput" ]]; then
+    if [[ $(tail -n 1 ~/.temp/last_nano) != $(echo "$(pwd)/$cleanedInput") ]]; then
+      printf "$(pwd)/$cleanedInput\n" >> ~/.temp/last_nano
+    fi
+    nano "$cleanedInput"
+  else
+    if [[ -f "$last_nano" ]]; then
+      if [[ -n "$cleanedInput" ]]; then
+        nano "$last_nano" "$cleanedInput"
+      else
+        nano "$last_nano"
+      fi
+    else
+      if [[ "$inc" > $(wc -l ~/.temp/last_nano) ]]; then
+        echo "Files can't be opened"
+        return
+      fi
+      ((inc++))
+      n -h "$inc" -inc
+    fi
+  fi
+
+}

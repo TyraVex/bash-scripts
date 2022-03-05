@@ -1,0 +1,124 @@
+#!/bin/bash
+
+# torrent scraper/streamer
+
+t() {
+
+  # stream a magnet link
+  if [[ "$1" == "magnet:?xt=urn:btih:"* ]]; then
+
+    magnet=$(egrep -o 'magnet\:\?xt\=urn\:btih\:[a-zA-Z0-9]+' <<< "$1")
+
+  # scrape pirate bay
+  else
+
+    # initialisation
+    num=1
+    unset movies
+    if [[ -z "$1" ]]; then
+      echo "No input"
+      return
+    fi
+    query=$(printf '%s' "$*" | tr ' ' '+' )
+
+    # send request
+    echo "Searching..."
+    request=$(curl -s --retry-delay 5 \
+    "https://m.thepiratebay0.org/s/?page=0&video=on&q=$query")
+
+    # process input
+    echo "Processing..."
+    if [[ -n $(grep "No hits. Try adding an asterisk in you search phrase." <<< "$request") ]]; then
+      echo "Nothing found"
+      return
+    fi
+    readarray -t name <<< $(grep -Po '(?<=title="Details for)[^"]+' <<< "$request")
+    readarray -t magnet <<< $(egrep -o 'magnet:\?xt=urn:btih:[A-Z0-9]+' <<< "$request")
+    readarray -t size <<< $(grep -Po '(?<=, Size )[0-9.]+&nbsp;.' <<< "$request" | sed 's:&nbsp;::g')
+    readarray -t seeders <<< $(grep -Po '(?<=<td align="right">)[0-9]+' <<< "$request" | sed -n 'n;p')
+    readarray -t leechers <<< $(grep -Po '(?<=<td align="right">)[0-9]+' <<< "$request" | sed -n 'p;n')
+
+    # format and print results
+    unset lines titles
+    for ((i=0; i < 30; i++)); do
+      unset quality
+      name[i]=$(tr '[[:upper:]]' '[[:lower:]]' <<< "${name[i]}")
+      if [[ -n "${seeders[i]}" && (("${seeders[i]}" > 0)) ]]; then
+
+        # format size in gigabytes
+        if [[ $(echo "${size[i]: -1}") == 'M' ]]; then
+          if [[ "${#size[i]}" == 8 ]]; then
+            size[i]=$(echo 1."${size[i]:1:2}"G)
+          else
+            size[i]=$(echo 0."${size[i]::-5}"G)
+          fi
+        else
+          size[i]=$(printf '%0.2f' "${size[i]::-1}")
+          size[i]+=G
+          if [[ "${#size[i]}" == 6 ]]; then
+            size[i]=$(echo "${size[i]::-2}"G)
+          fi
+        fi
+
+        # detect quality
+        case "${name[i]}" in
+          *"480p"*) quality="${red}SD${NC}";;
+          *"720p"*) quality="${yellow}HD${NC}";;
+          *"1080p"*) quality="${green}FD${NC}";;
+          *"2160p"*|*"4k"*) quality="${blue}4K${NC}";;
+          *) quality="${red}??${NC}";;
+        esac
+
+        # detect encoding
+        case "${name[i]}" in
+          *"x265"*|*"h265"*) quality="${quality/#/\\e[48;5;250m}";;
+        esac
+
+        # detect release type
+        case "${name[i]}" in
+          *"web"*|*"hdrip"*|*"hd-rip"*) size[i]="${size[i]/#/\\e[48;5;2m}\e[0m";;
+          *"blu-ray"*|*"bluray"*|*"bluray"*|*"bdrip"*|*"brip"*|*"brrip"*|*"bdr"*|*"bd25"*|*"bd50"*|*"bd5"*|*"bd9"*|*"bdmv"*|*"bdiso"*|*"complete.bluray"*) size[i]="${size[i]/#/\\e[48;5;111m}\e[0m";;
+          *"dvdrip"*|*"dvdmux"*|*"dvd-r"*|*"dvdr"*|*"dvd-full"*|*"full-rip"*|*"iso rip"*|*"lossless rip"*|*"untouched rip"*|*"dvd-5"*|*"dvd-9"*|*"dsr"*|*"dsrip"*|*"satrip"*|*"dthrip"*|*"dvbrip"*|*"hdtv"*|*"pdtv"*|*"dtvrip"*|*"tvrip"*|*"hdtvrip"*) size[i]="${size[i]/#/\\e[48;5;100m}\e[0m";;
+          *"ts"*|*"hdts"*|*"telesync"*|*"dvd"*|*"workprint"*|*"wp"*|*"tc"*|*"hdtc"*|*"telecine"*|*"ppv"*|*"scr"*|*"screener"*|*"bdscr"*|*"webscreener"*|*"ddc"*|*"r5"*) size[i]="${size[i]/#/\\e[48;5;166m}\e[0m";;
+          *"cam"*) size[i]="${size[i]/#/\\e[48;5;1m}\e[0m";;
+        esac
+
+        # calculate health
+        health="$(printf '%0.0f' "$(bc <<< "scale=3;(1 - (${leechers[i]} / (${seeders[i]} + ${leechers[i]}))) / (1 / (0.1 * ${seeders[i]}) + 1) * 100")")"
+
+        # storing results
+        lines[num]="$num | $health% ↓${leechers[i]} ↑${seeders[i]} | ${size[i]} | $quality\n"
+        titles[num]="${name[i]}\n"
+        magnets[num]="${magnet[i]}"
+        ((num++))
+
+      fi
+    done
+
+    for ((i=0; i < "${#lines[@]}"; i++)); do
+      echo -e "${lines[i]}" "${titles[i]}"
+    done
+
+    # prompt for torrent number
+    read -p "Choice : " choice
+    if [[ -z "$choice" ]]; then
+      choice=1
+    fi
+    magnet="${magnets[choice]}"
+
+  fi
+
+  # stream magnet
+  echo "$magnet"
+  echo "$magnet" > ~/.temp/last_torrent
+  peerflix -t -w "$magnet"
+
+}
+
+resume() {
+
+  magnet=$(cat ~/.temp/last_torrent)
+  echo "$magnet"
+  peerflix -t -w "$magnet"
+
+}

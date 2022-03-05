@@ -1,0 +1,59 @@
+#!/bin/bash
+
+r() {
+
+  # initialisation
+  unset filename
+  last_script=$(cat ~/.temp/last_script)
+
+
+  # checking target
+  if [[ -n "$1" ]]; then
+    if [[ -f "$1" ]]; then
+      basename=$(basename -- "$1")
+      filename="${1%%.*}"
+      ext=".${1##*.}"
+      printf "$(pwd)/$1" > ~/.temp/last_script
+    else
+      echo "Target is not accessible"
+    fi
+  elif [[ -f "$last_script" ]]; then
+    basename=$(basename -- "$last_script")
+    filename="${basename%%.*}"
+    ext=".${basename##*.}"
+  else
+    if [[ "$last_script" == *"/data/data/com.termux/files/home"* ]]; then
+      readablePath=$(sed 's:\/data\/data\/com\.termux\/files\/home:\~:g' <<< "$last_script")
+    fi
+    echo "Last target is not accessible"
+    echo "($readablePath)"
+  fi
+
+
+  # executing target
+  if [[ -n "$filename" ]]; then
+    if [[ ! "$basename" == *"."* ]]; then
+      unset ext
+    fi
+    if [[ $(head -c 3 "$filename$ext") == "#!/" || "$ext" == ".sh" ]]; then
+      chmod +x "$filename$ext" && ./"$filename$ext" "${@:2}"
+    elif [[ "$ext" == ".c" ]]; then
+      ({ while kill -0 "$$"; do sleep 10; done; rm "$filename.exe"; } > /dev/null 2>&1 &)
+      gcc -Wall -Wextra -Werror "$filename$ext" -o "$filename".exe -lm \
+      && (sleep 1 && rm "$filename".exe &) \
+      && ./"$filename".exe "${@:2}"
+    elif [[ "$ext" == ".exe" ]]; then
+      exec ./"$filename$ext" "${@:2}"
+    elif [[ "$ext" == ".java" ]]; then
+      ({ while kill -0 "$$"; do sleep 10; done; rm "$filename.class"; } > /dev/null 2>&1 &)
+      proot javac "$filename.java" \
+      && (sleep 1 && rm "$filename.class" &) \
+      && proot java "$filename" "${@:2}"
+    elif [[ "$ext" == ".class" ]]; then
+      proot java "$filename" "${@:2}"
+    else
+      echo "File type isn't supported"
+    fi
+  fi
+
+}
