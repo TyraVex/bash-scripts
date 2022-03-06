@@ -13,6 +13,9 @@ blue='\e[34m'
 
 url() {
 
+  if [[ -z "$1" ]]; then
+    echo "No input"
+  fi
   if [[ ! "$1" == *"http"* ]]; then
     input=`echo https://"$1"`
   else
@@ -111,12 +114,12 @@ myip() {
 }
 
 
-# pip updater
+# pip updater - breaks my system - depreciated
 
-alias upip='\
-
-  pip list --outdated --format=freeze \
-  | grep -v '^\-e' | cut -d = -f 1  \
-  | xargs -n1 pip install -U \
-
-'
+#alias upip='\
+#
+#  pip list --outdated --format=freeze \
+#  | grep -v '^\-e' | cut -d = -f 1  \
+#  | xargs -n1 pip install -U \
+#
+#'

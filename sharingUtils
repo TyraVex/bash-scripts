@@ -12,6 +12,11 @@ up() {
 
 }
 
+anonfiles() {
+
+  url "https://anonfiles.com/?p=1"
+
+}
 
 # url shortener
 
