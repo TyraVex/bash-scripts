@@ -4,7 +4,7 @@ n() {
 
   # initialisation
   hPos=1
-  touch ~/.temp/last_nano
+  touch ~/.temp/last/nano
   detectIncrement=$(egrep -o "\-inc" <<< "$*")
   if [[ -z "$detectIncrement" ]]; then
     inc=1
@@ -20,12 +20,12 @@ n() {
   cleanedInput=$(sed 's:-h [0-9]*::g' <<< "$*" | sed 's: $::g' | sed 's:^ ::g')
   cleanedInput=$(sed 's:-h::g' <<< "$cleanedInput")
   cleanedInput=$(sed 's:-inc::g' <<< "$cleanedInput")
-  last_nano=$(tail -n "$hPos" ~/.temp/last_nano | head -n 1)
+  last_nano=$(tail -n "$hPos" ~/.temp/last/nano | head -n 1)
 
   # launching target
   if [[ -n "$cleanedInput" ]]; then
-    if [[ $(tail -n 1 ~/.temp/last_nano) != $(echo "$(pwd)/$cleanedInput") ]]; then
-      printf "$(pwd)/$cleanedInput\n" >> ~/.temp/last_nano
+    if [[ $(tail -n 1 ~/.temp/last/nano) != $(echo "$(pwd)/$cleanedInput") ]]; then
+      printf "$(pwd)/$cleanedInput\n" >> ~/.temp/last/nano
     fi
     nano "$cleanedInput"
   else
@@ -36,7 +36,7 @@ n() {
         nano "$last_nano"
       fi
     else
-      if [[ "$inc" > $(wc -l ~/.temp/last_nano) ]]; then
+      if [[ "$inc" > $(wc -l ~/.temp/last/nano) ]]; then
         echo "Files can't be opened"
         return
       fi

@@ -4,7 +4,7 @@ r() {
 
   # initialisation
   unset filename
-  last_script=$(cat ~/.temp/last_script)
+  last_script=$(cat ~/.temp/last/script)
 
 
   # checking target
@@ -13,7 +13,7 @@ r() {
       basename=$(basename -- "$1")
       filename="${1%%.*}"
       ext=".${1##*.}"
-      printf "$(pwd)/$1" > ~/.temp/last_script
+      printf "$(pwd)/$1" > ~/.temp/last/script
     else
       echo "Target is not accessible"
     fi

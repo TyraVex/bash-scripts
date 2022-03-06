@@ -3,14 +3,23 @@
 
 # initialisation
 ub=/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/ubuntu/root
-if [[ -d /sdcard/Download/ && ! -d /sdcard/Download/Shared ]]; then
-  mkdir /sdcard/Download/Shared
-fi
+mkdir /sdcard/Download/Shared 2> /dev/null
+
+# bulk rename
+ren() {
+  readarray -t files <<< $(ls --color=never)
+  for ((i=0; i < "${#files[@]}"; i++)); do
+  renammed=$(sed -E "s:$1:$2:g" <<< "${files[i]}")
+    mv "${files[i]}" "$renammed" 2> /dev/null
+  done
+}
 
 # backup (TERMUX-WSL)
 alias bkp=' \
   if [[ -d /sdcard/Download/Shared ]]; then \
-    zip -q -r /sdcard/Download/Shared/backup.zip ~/ "$ub"/; \
+    cd ~/../
+    zip -q -r /sdcard/Download/Shared/backup.zip home/; \
+    cd
   else \
     zip -q -r ~/backup.zip ~/; \
   fi \

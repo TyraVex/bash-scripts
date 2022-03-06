@@ -13,12 +13,11 @@ alias pull='git pull origin main'
 alias push='git push origin main'
 alias vm='proot-distro login ubuntu'
 alias a='nano ~/.bashrc; source ~/.bashrc'
-alias tclear='rm /tmp/torrent-stream/ -rf'
+alias ccc='rm /tmp/torrent-stream/ -rf'
 alias ps='ps | grep -v -e ps -e grep -e bash'
 alias u='apt update; apt upgrade; apt autoremove'
 alias ls='ls --color --group-directories-first -t -X'
 alias la='ls -A --color --group-directories-first -t -X'
-alias upip='pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1  | xargs -n1 pip install -U'
 
 # functions
 

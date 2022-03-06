@@ -110,14 +110,14 @@ t() {
 
   # stream magnet
   echo "$magnet"
-  echo "$magnet" > ~/.temp/last_torrent
+  echo "$magnet" > ~/.temp/last/torrent
   peerflix -t -w "$magnet"
 
 }
 
 resume() {
 
-  magnet=$(cat ~/.temp/last_torrent)
+  magnet=$(cat ~/.temp/last/torrent)
   echo "$magnet"
   peerflix -t -w "$magnet"
 
