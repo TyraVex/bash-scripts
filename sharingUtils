@@ -4,8 +4,12 @@
 # file uploader
 
 up() {
-  curl -s -F "file=@$1" https://api.anonfiles.com/upload \
-  | egrep -o "https:\/\/anonfiles\.com\/[a-zA-Z0-9]{10}" | head -n 1
+
+  link=$(curl -s -F "file=@$1" "https://api.anonfiles.com/upload?token=$ANONFILES_API_KEY" \
+  | egrep -o "https:\/\/anonfiles\.com\/[a-zA-Z0-9]{10}" | head -n 1)
+  printf "$1 > $link\n" >> ~/.temp/last/urls
+  echo "$link"
+
 }
 
 
@@ -22,21 +26,15 @@ short() {
   input=$(sed 's/[/*^$]/\\&/g' <<< "$input")
   echo "$input"
 
-
   # sending request + retrieving url
-  output=$(curl -s --location --request POST 'https://u.nu/api/url/add' \
+  link=$(curl -s --location --request POST 'https://u.nu/api/url/add' \
   --header 'Authorization: Bearer $UNU_API_KEY' \
   --header 'Content-Type: application/json' \
   --data-raw '{ "url": "'$input'" }' \
   | egrep -o "https:[\][/][\][/]u\.nu[\][/][a-zA-Z]{5}" | tr -d '\\')
-  echo "$output"
-
 
   # logging url
-  if [[ -f "$2" ]]; then
-   printf "$2 > $output\n" >> ~/.temp/urls
-  else
-   printf "$1 > $output\n" >> ~/.temp/urls
-  fi
+  printf "$1 > $link\n" >> ~/.temp/last/urls
+  echo "$output"
 
 }

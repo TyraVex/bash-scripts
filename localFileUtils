@@ -7,7 +7,7 @@ mkdir /sdcard/Download/Shared 2> /dev/null
 
 # bulk rename
 ren() {
-  readarray -t files <<< $(ls --color=never)
+  readarray -t files <<< $(ls ~/scripts -1 --color=never)
   for ((i=0; i < "${#files[@]}"; i++)); do
   renammed=$(sed -E "s:$1:$2:g" <<< "${files[i]}")
     mv "${files[i]}" "$renammed" 2> /dev/null

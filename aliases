@@ -18,6 +18,7 @@ alias ps='ps | grep -v -e ps -e grep -e bash'
 alias u='apt update; apt upgrade; apt autoremove'
 alias ls='ls --color --group-directories-first -t -X'
 alias la='ls -A --color --group-directories-first -t -X'
+alias ws='cd ~/../usr/share/apache2/default-site/htdocs'
 
 # functions
 
