@@ -7,6 +7,10 @@ up() {
 
   link=$(curl -s -F "file=@$1" "https://api.anonfiles.com/upload?token=$ANONFILES_API_KEY" \
   | egrep -o "https:\/\/anonfiles\.com\/[a-zA-Z0-9]{10}" | head -n 1)
+  if [[ -z "$link" ]]; then
+    echo "Failed"
+    return
+  fi
   printf "$1 > $link\n" >> ~/.temp/last/urls
   echo "$link"
 
@@ -29,7 +33,7 @@ short() {
     input="$1"
   fi
   input=$(sed 's/[/*^$]/\\&/g' <<< "$input")
-  echo "$input"
+#  echo "$input"
 
   # sending request + retrieving url
   link=$(curl -s --location --request POST 'https://u.nu/api/url/add' \
@@ -39,6 +43,10 @@ short() {
   | egrep -o "https:[\][/][\][/]u\.nu[\][/][a-zA-Z]{5}" | tr -d '\\')
 
   # logging url
+  if [[ -z "$link" ]]; then
+    echo "Failed"
+    return
+  fi
   printf "$1 > $link\n" >> ~/.temp/last/urls
   echo "$output"
 

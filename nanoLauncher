@@ -3,7 +3,6 @@
 n() {
 
   # initialisation
-  hPos=1
   touch ~/.temp/last/nano
   detectIncrement=$(egrep -o "\-inc" <<< "$*")
   if [[ -z "$detectIncrement" ]]; then
@@ -11,9 +10,16 @@ n() {
   fi
 
   # detecting arguments
-  detectHistory=$(egrep -o "\-h [0-9]*" <<< "$*" | egrep -o "[0-9]+")
-  if [[ -n "$detectHistory" ]]; then
-    hPos="$detectHistory"
+  detectHistory=$(egrep -o "\-h [0-9]*" <<< "$*")
+  detectNumber=$(egrep -o "[0-9]+" <<< "$detectHistory")
+  if [[ -n "$detectNumber" ]]; then
+    hPos="$detectNumber"
+  elif [[ -n "detectHistory" ]]; then
+    hPos=2
+  fi
+  if [[ "$*" == *"-H"* ]]; then
+    cat .temp/last/nano | tail -n 10 | sed 's:/data/data/com.termux/files/home:~:g'
+    return
   fi
 
   # removing arguments from input
