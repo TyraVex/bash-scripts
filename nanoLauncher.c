@@ -50,13 +50,13 @@ int main(void)
 
   // sort them
   int size = k;
-  for(; k != -1; k--)
+  for(int l = 0; l < k; l++)
   {
-    searchIndex = size - k;
-    for(; searchIndex != -1; searchIndex--)
+    searchIndex = l + 1;
+    for(; searchIndex < size; searchIndex++)
     {
-      printf("POS: %d > %s | COMPARING WITH: %d > %s\n", k, valid[k], searchIndex, valid[searchIndex]);
-      if(valid[k] == valid[searchIndex])
+      printf("POS: %d > %s\nCOMPARING WITH: %d > %s\n", l, valid[l], searchIndex, valid[searchIndex]);
+      if(valid[l] == valid[searchIndex])
       {
         match = 1;
         break;
@@ -65,7 +65,7 @@ int main(void)
     if (match == 1)
     {
       match = 0;
-      printf("HIT: %s\n", valid[k]);
+      printf("HIT: %s\n", valid[l]);
     }
     puts("------------------------------");
   }
