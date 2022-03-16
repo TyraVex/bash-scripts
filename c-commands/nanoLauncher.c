@@ -21,7 +21,7 @@ int main(void)
 {
 
   // initialisation
-  int i=0, k=0, searchIndex, match=0;
+  int i=0, k=0, searchIndex, match = 0;
   char line[1000], valid[1000][1000], path[1000][1000];
   FILE *nanoHistory = fopen("/data/data/com.termux/files/home/.temp/last/nano", "r");
   if (nanoHistory == NULL) { return 0; }
@@ -35,7 +35,7 @@ int main(void)
   }
   fclose(nanoHistory);
 
-  // check file paths
+  // check file pathsk
   for(int j=0; j < i; j++)
   {
     FILE* testHistory = fopen(path[j], "r");
@@ -53,10 +53,9 @@ int main(void)
   for(int l = 0; l < k; l++)
   {
     searchIndex = l + 1;
-    for(; searchIndex < size; searchIndex++)
+    for(; searchIndex < size + 1; searchIndex++)
     {
-      printf("POS: %d > %s\nCOMPARING WITH: %d > %s\n", l, valid[l], searchIndex, valid[searchIndex]);
-      if(valid[l] == valid[searchIndex])
+      if(strcmp(valid[l], valid[searchIndex]) == 0)
       {
         match = 1;
         break;
@@ -65,11 +64,16 @@ int main(void)
     if (match == 1)
     {
       match = 0;
-      printf("HIT: %s\n", valid[l]);
     }
-    puts("------------------------------");
+    else
+    {
+      printf("%s\n", valid[l]);
+    }
   }
-
+  printf("%s\n", valid[size]);
   return 0;
 
 }
+
+//    printf("%d : %s\n\n", l, valid[l]);
+//      printf("%d > %s\n", searchIndex, valid[searchIndex]);
