@@ -16,7 +16,7 @@ url() {
   if [[ -z "$1" ]]; then
     echo "No input"
   fi
-  if [[ ! "$1" == *"http"* ]]; then
+  if [[ ! "$1" =~ ^"http" ]]; then
     input=`echo https://"$1"`
   else
     input="$1"
@@ -24,6 +24,12 @@ url() {
   echo "$input"
   am start --user 0 -a android.intent.action.VIEW \
   -d "$input" > /dev/null
+
+}
+
+finalurl() {
+
+  curl $1 -s -L -I -o /dev/null -w '%{url_effective}'
 
 }
 

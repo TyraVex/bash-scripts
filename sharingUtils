@@ -5,8 +5,41 @@
 
 up() {
 
+  if [[ -z "$1" ]]; then echo Invalid Input; return; fi
+  if [[ -e "$1.zip" ]]; then
+    file="$1.zip"
+  elif [[ -e "$1.7z" ]]; then
+    file="$1.7z"
+  elif [[ -d "$1" ]]; then
+    zip -qr - "$1" | pv -bep -s $(du -bs "$1" | awk '{print $1}') > "$1.zip"
+    file="$1.zip"
+    zipped=true
+  elif [[ -e "$1" ]]; then
+    file="$1"
+  fi
+  serv=$(curl -s 'https://api.gofile.io/getServer' | jq -r .data.server)
+  if [[ -n "$noshorten" ]]; then
+    unset noshorten
+    curl -# -F token="$GOFILE_API_KEY" -F folderId="$GOFILE_FOLDER_ID" -F "file=@$file" "https://$serv.gofile.io/uploadFile" | jq -r .data.directLink
+  else
+    sgo $(curl -# -F token="$GOFILE_API_KEY" -F folderId="$GOFILE_FOLDER_ID" -F "file=@$file" "https://$serv.gofile.io/uploadFile" | jq -r .data.directLink)
+  fi
+  if [[ -n "$zipped" ]]; then
+    unset zipped
+    rm "$1".zip
+  fi
+
+}
+
+upl() {
+  noshorten=true
+  up "$@"
+}
+
+anonup() {
+
   link=$(curl -s -F "file=@$1" "https://api.anonfiles.com/upload?token=$ANONFILES_API_KEY" \
-  | egrep -o "https:\/\/anonfiles\.com\/[a-zA-Z0-9]{10}" | head -n 1)
+  | jq -r .data.file.url.full)
   if [[ -z "$link" ]]; then
     echo "Failed"
     return
@@ -17,37 +50,59 @@ up() {
 }
 
 anonfiles() {
-
   url "https://anonfiles.com/?p=1"
-
 }
+
 
 # url shortener
 
-short() {
+1o2() {
 
-  # analysing input
-  if [[ ! "$1" == *"http"* ]]; then
-    input=$(echo https://"$1")
+  if [[ -n "$1" ]]; then
+    if [[ ! "$1" =~ ^'http' ]]; then
+      url=$(echo 'https://'"$1")
+    else
+      url="$1"
+    fi
+    link=$(curl -s 'https://1o2.ir/magic.php' -d '{"url":"'"$url"'","name":"'"$2"'"}' | jq -r .short)
+    if [[ -n "$link" ]]; then
+      echo "1o2.ir/$link"
+      unset "$link"
+    fi
   else
-    input="$1"
+    echo "Usage : 1o2 <url> <name> (optionnal)"
   fi
-  input=$(sed 's/[/*^$]/\\&/g' <<< "$input")
-#  echo "$input"
 
-  # sending request + retrieving url
-  link=$(curl -s --location --request POST 'https://u.nu/api/url/add' \
-  --header 'Authorization: Bearer $UNU_API_KEY' \
-  --header 'Content-Type: application/json' \
-  --data-raw '{ "url": "'$input'" }' \
-  | egrep -o "https:[\][/][\][/]u\.nu[\][/][a-zA-Z]{5}" | tr -d '\\')
 
-  # logging url
-  if [[ -z "$link" ]]; then
-    echo "Failed"
+}
+
+sgo() {
+
+  url="$1"
+  if [[ -z "$url" ]]; then read -p "url : " url; fi
+  if [[ ! "$url" =~ ^https?\:\/\/ ]]; then url="https://$url"; fi
+  request=$(curl -s 'https://api.go.ly/api/v1/link/public' \
+  -H 'content-type: application/json' \
+  -d '{"UserID":740,"Type":0,"DomainID":2,"Payload":{"Destination":"'"$url"'"}}')
+  link="go.ly/$(jq -r .Slug <<< $request)"
+  echo
+  echo "$url"
+  echo "$link"
+
+}
+
+lgo() {
+
+  unset shortLinks longLinks
+  links=$(curl -s 'https://api.go.ly/api/v1/links?UserID='"$GOLY_USER_ID"'')
+  readarray -t shortLinks <<< "$(jq -r .Links[].Slug <<< "$links")"
+  readarray -t longLinks <<< "$(jq -r .Links[].Payload <<< "$links" | jq -r .Destination)"
+  if [[ -z "$shortLinks" ]]; then
+    echo No links found.
     return
   fi
-  printf "$1 > $link\n" >> ~/.temp/last/urls
-  echo "$output"
+  for ((i=0; i < "${#shortLinks[@]}"; i++)); do
+    echo "$(($i+1)) - go.ly/${shortLinks[i]} - ${longLinks[i]}"
+  done
 
 }
