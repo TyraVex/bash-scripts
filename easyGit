@@ -3,9 +3,7 @@
 g() {
   if [[ -z "$1" ]]; then
     echo
-    echo '# EasyGit - Main menu'
-    echo
-    if [[ -f .git ]]; then
+    if [[ ! -d .git ]]; then
       echo -e '\e[34m[i] - init\e[0m'
       echo -e '\e[34m[s] - setup\e[0m'
       echo
