@@ -51,9 +51,9 @@ g() {
        fi;;
     c) read -p 'commit name ? ' commit
        if [[ -n "$commit" ]]; then
-         git commit -m "$commit"
+         git commit -am "$commit"
        else
-         git commit -m 'update'
+         git commit -am 'update'
        fi;;
     C) read -p 'commit name ? ' commit
        git add *
@@ -64,9 +64,9 @@ g() {
        fi;;
     cp)read -p 'commit name ? ' commit
        if [[ -n "$commit" ]]; then
-         git commit -m "$commit"
+         git commit -am "$commit"
        else
-         git commit -m 'update'
+         git commit -am 'update'
        fi
        git push origin main;;
     Cp)read -p 'commit name ? ' commit
@@ -79,9 +79,9 @@ g() {
        git push origin main;;
     cf) read -p 'commit name ? ' commit
        if [[ -n "$commit" ]]; then
-         git commit -m "$commit"
+         git commit -am "$commit"
        else
-         git commit -m 'update'
+         git commit -am 'update'
        fi
        git push origin main -f;;
     Cf)read -p 'commit name ? ' commit

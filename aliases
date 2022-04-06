@@ -9,17 +9,12 @@ alias ...='cd ../..'
 alias ....='cd ../../..'
 alias .....='cd ../../../..'
 alias e='logout; exit'
-alias pull='git pull origin main'
-alias push='git push origin main'
-alias gdel='git reset --hard HEAD^'
 alias vm='proot-distro login ubuntu'
 alias a='nano ~/.bashrc; source ~/.bashrc'
 alias ccc='rm /data/data/com.termux/files/usr/tmp/* -rf'
-alias ps='ps -e | grep -v -e ps -e grep -e bash -e TIME'
 alias u='apt update; apt upgrade; apt autoremove'
 alias ls='ls --color --group-directories-first -t -X'
 alias la='ls -A --color --group-directories-first -t -X'
-alias ws='cd ~/../usr/share/apache2/default-site/htdocs'
 
 # functions
 
@@ -30,9 +25,6 @@ cs() { cd "$1" && ls; }
 ln() { cat "$1" | wc -l; }
 apti() { apt install "$@"; }
 path() { readlink -f "$1"; }
-dif() { sort "$@" | uniq -u; }
-cmt() { git commit -m "$*" -a; }
-gurl() { git remote add origin "$1"; }
-gren() { git commit --amend -m "$*"; }
+diff() { sort "$@" | uniq -u; }
 uln() { sort "$1" | uniq -u | wc -l; }
 print() { cat "$1" | fold -sw "$COLUMNS"; }
