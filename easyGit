@@ -5,27 +5,30 @@ g() {
     echo
     echo '# EasyGit - Main menu'
     echo
-    git status
-    echo
-    echo -e '\e[34m[i] - init\e[0m'
-    echo -e '\e[34m[s] - setup\e[0m'
-    echo
-    echo -e '\e[35mMix of args possible :\e[0m'
-    echo -e '\e[32m[c] - commit current\e[0m'
-    echo -e '\e[32m[C] - commit all\e[0m'
-    echo -e '\e[32m[p] - push\e[0m'
-    echo -e '\e[32m[f] - force push\e[0m'
-    echo
-    echo -e '\e[32m[P] - pull\e[0m'
-    echo -e '\e[32m[F] - force pull\e[0m'
-    echo
-    echo -e '\e[31m[r] - rename commit\e[0m'
-    echo -e '\e[31m[d] - delete commit\e[0m'
-    echo
-    echo -e '\e[33m[u] - edit url\e[0m'
-    echo -e '\e[33m[b] - edit branch\e[0m'
-    echo -e '\e[33m[o] - checkout\e[0m'
-    echo
+    if [[ -f .git ]]; then
+      echo -e '\e[34m[i] - init\e[0m'
+      echo -e '\e[34m[s] - setup\e[0m'
+      echo
+    else
+      git status
+      echo
+      echo -e '\e[35mMix of args possible :\e[0m'
+      echo -e '\e[32m[c] - commit current\e[0m'
+      echo -e '\e[32m[C] - commit all\e[0m'
+      echo -e '\e[32m[p] - push\e[0m'
+      echo -e '\e[32m[f] - force push\e[0m'
+      echo
+      echo -e '\e[32m[P] - pull\e[0m'
+      echo -e '\e[32m[F] - force pull\e[0m'
+      echo
+      echo -e '\e[31m[r] - rename commit\e[0m'
+      echo -e '\e[31m[d] - delete commit\e[0m'
+      echo
+      echo -e '\e[33m[u] - edit url\e[0m'
+      echo -e '\e[33m[b] - edit branch\e[0m'
+      echo -e '\e[33m[o] - checkout\e[0m'
+      echo
+    fi
     read -p 'Choice : ' choice
     choice=($choice)
   else
@@ -35,7 +38,9 @@ g() {
     i) git init; git branch -m main;;
     s) git init; git branch -m main
        read -p 'url : ' url
-       git remote add origin "$url"
+       if [[ -n "$url" ]]; then
+         git remote add origin "$url"
+       fi
        read -p 'gitignore : ' gitignore
        if [[ -n "$gitignore" ]]; then
          echo "$gitignore" > .gitignore
@@ -98,5 +103,18 @@ g() {
     F) git pull origin main -f;;
     r) git commit --amend -m "$*";;
     d) git reset --hard HEAD^;;
+    u) read -p 'url ? ' url
+       if [[ -n "$url" ]]; then
+         git remote set-url origin "$url"
+       fi;;
+    b) read -p 'branch ? ' branch
+       if [[ -n "$branch" ]]; then
+         git branch -m "$branch"
+       fi;;
+    c) git checkout
+       read -p 'file ? ' file
+       if [[ -n "$file" ]]; then
+         git checkout "$file"
+       fi;;
   esac
 }
