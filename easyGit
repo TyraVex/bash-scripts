@@ -1,0 +1,102 @@
+#!/bin/bash
+
+g() {
+  if [[ -z "$1" ]]; then
+    echo
+    echo '# EasyGit - Main menu'
+    echo
+    git status
+    echo
+    echo -e '\e[34m[i] - init\e[0m'
+    echo -e '\e[34m[s] - setup\e[0m'
+    echo
+    echo -e '\e[35mMix of args possible :\e[0m'
+    echo -e '\e[32m[c] - commit current\e[0m'
+    echo -e '\e[32m[C] - commit all\e[0m'
+    echo -e '\e[32m[p] - push\e[0m'
+    echo -e '\e[32m[f] - force push\e[0m'
+    echo
+    echo -e '\e[32m[P] - pull\e[0m'
+    echo -e '\e[32m[F] - force pull\e[0m'
+    echo
+    echo -e '\e[31m[r] - rename commit\e[0m'
+    echo -e '\e[31m[d] - delete commit\e[0m'
+    echo
+    echo -e '\e[33m[u] - edit url\e[0m'
+    echo -e '\e[33m[b] - edit branch\e[0m'
+    echo -e '\e[33m[o] - checkout\e[0m'
+    echo
+    read -p 'Choice : ' choice
+    choice=($choice)
+  else
+    choice="$1"
+  fi
+  case "$choice" in
+    i) git init; git branch -m main;;
+    s) git init; git branch -m main
+       read -p 'url : ' url
+       git remote add origin "$url"
+       read -p 'gitignore : ' gitignore
+       if [[ -n "$gitignore" ]]; then
+         echo "$gitignore" > .gitignore
+       fi
+       read -p "to add " toAdd
+       if [[ -n "$gitignore" ]]; then
+         git add "$toAdd"
+       fi
+       git commit -m 'initial commit'
+       read -p "push ? " push
+       if [[ "$push" == 'y' ]]; then
+         git push origin main
+       fi;;
+    c) read -p 'commit name ? ' commit
+       if [[ -n "$commit" ]]; then
+         git commit -m "$commit"
+       else
+         git commit -m 'update'
+       fi;;
+    C) read -p 'commit name ? ' commit
+       git add *
+       if [[ -n "$commit" ]]; then
+         git commit -m "$commit"
+       else
+         git commit -m 'update'
+       fi;;
+    cp)read -p 'commit name ? ' commit
+       if [[ -n "$commit" ]]; then
+         git commit -m "$commit"
+       else
+         git commit -m 'update'
+       fi
+       git push origin main;;
+    Cp)read -p 'commit name ? ' commit
+       git add *
+       if [[ -n "$commit" ]]; then
+         git commit -m "$commit"
+       else
+         git commit -m 'update'
+       fi
+       git push origin main;;
+    cf) read -p 'commit name ? ' commit
+       if [[ -n "$commit" ]]; then
+         git commit -m "$commit"
+       else
+         git commit -m 'update'
+       fi
+       git push origin main -f;;
+    Cf)read -p 'commit name ? ' commit
+       git add *
+       if [[ -n "$commit" ]]; then
+         git commit -m "$commit"
+       else
+         git commit -m 'update'
+       fi
+       git push origin main -f;;
+    p) git push origin main;;
+    f) git push origin main -f;;
+    P) git pull origin main;;
+    F) git pull origin main -f;;
+    r) git commit --amend -m "$*";;
+    d) git reset --hard HEAD^;;
+  esac
+}

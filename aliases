@@ -11,6 +11,7 @@ alias .....='cd ../../../..'
 alias e='logout; exit'
 alias pull='git pull origin main'
 alias push='git push origin main'
+alias gdel='git reset --hard HEAD^'
 alias vm='proot-distro login ubuntu'
 alias a='nano ~/.bashrc; source ~/.bashrc'
 alias ccc='rm /data/data/com.termux/files/usr/tmp/* -rf'
@@ -32,5 +33,6 @@ path() { readlink -f "$1"; }
 dif() { sort "$@" | uniq -u; }
 cmt() { git commit -m "$*" -a; }
 gurl() { git remote add origin "$1"; }
+gren() { git commit --amend -m "$*"; }
 uln() { sort "$1" | uniq -u | wc -l; }
 print() { cat "$1" | fold -sw "$COLUMNS"; }

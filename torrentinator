@@ -7,7 +7,7 @@ t() {
   # stream a magnet link
   if [[ "$1" == "magnet:?xt=urn:btih:"* ]]; then
 
-    magnet=$(egrep -o 'magnet\:\?xt\=urn\:btih\:[a-zA-Z0-9]+' <<< "$1")
+    magnet="$1"
 
   # scrape pirate bay
   else
