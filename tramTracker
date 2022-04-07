@@ -29,19 +29,22 @@ tram() {
   if [[ -z "$station" ]]; then tramhelp; return; fi
 
   # sending request
-  echo "$station > $direction"
+  echo -e "\n\e[35m> $station > $direction\e[0m\n"
   station=$(printf '%s' "$station" | tr ' ' '+' | tr '[:lower:]' '[:upper:]')
   direction=$(printf '%s' "$direction" | tr ' ' '+' | tr '[:lower:]' '[:upper:]')
   passages=$(curl -s "https://opendata.lillemetropole.fr/api/records/1.0/search/?dataset=ilevia-prochainspassages&timezone=CET&refine.nomstation=$station&refine.sensligne=$direction")
   readarray -t departures <<< $(echo "$passages" | jq -r .records[].fields.heureestimeedepart)
-  updatedTemp=$(echo "$passages" | jq -r .records[].fields.datemodification)
+  readarray -t updatedTemp <<< $(echo "$passages" | jq -r .records[].fields.datemodification)
+  monthDay=$(date +%m-%d)
   for ((i=0; i < "${#departures[@]}"; i++)); do
     schedules[i]="${departures[i]:11:-6}"
-    updated[i]="${updatedTemp[i]:11:-6}"
+    updated[i]="${updatedTemp[i]:5:-6}"
+    if [[ "${updated[i]:0:5}" == "$monthDay" ]]; then
+      updated[i]="${updated[i]:6:-3}"
+    else
+      updated[i]="${updated[i]/T/ }"
+    fi
   done
-  echo "$updatedTemp"
-  echo "${schedules[@]}"
-  return
   # watchdog
   if [[ -z "$schedules" ]]; then
     echo "Service down or wrong station name"
@@ -59,7 +62,7 @@ tram() {
     fi
     deltasec=$(("$tramsec" - "$currentsec"))
     if (( "$deltasec" > 43200 )); then
-      echo "${schedules[i]} > Alredy happened"
+      echo -e "\e[31m> ${schedules[i]} \e[0m•\e[33m Alredy happened\e[0m"
     else
       minutes=$(("$deltasec" / 60))
       seconds=$(("$deltasec" % 60))
@@ -69,9 +72,10 @@ tram() {
       if (( "$seconds" < 10 )); then
         seconds="0$seconds"
       fi
-      echo "${schedules[i]} > In $minutes:$seconds > updated : ${updated[i]}"
+      echo -e "\e[33m> ${schedules[i]}\e[0m • \e[32mIn $(tput bold)$minutes:$seconds$(tput sgr0) \e[34m(since ${updated[i]})\e[0m"
     fi
   done
+  echo
 
 }
 
