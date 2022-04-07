@@ -5,6 +5,7 @@
 
 up() {
 
+  # init
   unset file link
   trap 'unset file link; return' 2 3
   if [[ "$1" =~ [a|g|G] ]]; then
@@ -23,7 +24,13 @@ up() {
     echo -e '\e[31m[e] - exit\e[0m'
     echo
     read -p 'option : ' choice
+    if [[ "$choice" == 'e' ]]; then
+      echo
+      return
+    fi
   fi
+
+  # file selection
   if [[ -f "$1" ]]; then
     file="$1"
   elif [[ -f "$2" ]]; then
@@ -36,6 +43,8 @@ up() {
     fi
   fi
   echo
+
+  # worker
   for ((i=0; i < "${#choice}"; i++)); do
     case "${choice:i:1}" in
       g) serv=$(curl -s 'https://api.gofile.io/getServer' | jq -r .data.server)
