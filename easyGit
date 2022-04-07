@@ -2,29 +2,34 @@
 
 g() {
   if [[ -z "$1" ]]; then
-    echo
+    clear
     if [[ ! -d .git ]]; then
       echo -e '\e[34m[i] - init\e[0m'
       echo -e '\e[34m[s] - setup\e[0m'
       echo
     else
+      url="$(git config --get remote.origin.url)"
+      url="${url/https:\/\/github\.com\//}"
+      echo -e "\e[35m> ${url:0:-4}\e[0m"
+      echo
       git status
       echo
-      echo -e '\e[35mMix of args possible :\e[0m'
       echo -e '\e[32m[c] - commit current\e[0m'
       echo -e '\e[32m[C] - commit all\e[0m'
       echo -e '\e[32m[p] - push\e[0m'
-      echo -e '\e[32m[f] - force push\e[0m'
+      echo -e '\e[32m[f] - push -f\e[0m'
       echo
-      echo -e '\e[32m[P] - pull\e[0m'
-      echo -e '\e[32m[F] - force pull\e[0m'
+      echo -e '\e[35m[r] - rename commit\e[0m'
+      echo -e '\e[35m[d] - delete commit\e[0m'
       echo
-      echo -e '\e[31m[r] - rename commit\e[0m'
-      echo -e '\e[31m[d] - delete commit\e[0m'
+      echo -e '\e[34m[P] - pull\e[0m'
+      echo -e '\e[34m[F] - pull -f\e[0m'
       echo
-      echo -e '\e[33m[u] - edit url\e[0m'
-      echo -e '\e[33m[b] - edit branch\e[0m'
+      echo -e "\e[33m[b] - edit branch\e[0m"
       echo -e '\e[33m[o] - checkout\e[0m'
+      echo -e "\e[33m[u] - edit url\e[0m"
+      echo
+      echo -e "\e[31m[e] - Exit\e[0m"
       echo
     fi
     read -p 'Choice : ' choice
