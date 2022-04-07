@@ -12,6 +12,25 @@ ren() {
   done
 }
 
+# average time of command
+avg() {
+  calc=0
+  if [[ -z "$1" || -z "$2" ]]; then
+    echo 'Usage : avg <times> <command>'
+  else
+    echo
+    times="$1"
+    command="${@:2}"
+    for ((i=0; i < "$times"; i++)); do
+      time=$((time $command > /dev/null 2>&1) 2>&1)
+      calc+="+${time:8:-28}"
+      echo -e "\e[A$i/$1"
+    done
+    time=$(bc <<< 'scale=3;('"$calc"')/'"$times"'*1000')
+    echo -e "\e[A${time:0:-4}ms"
+  fi
+}
+
 # zip content listing
 7zl() {
   7za l "$1" | grep -v -e .git -e node_modules | tail -n+21 | head -n-2 | awk '{print $5}' | grep -v ^0$ | tail -n+2

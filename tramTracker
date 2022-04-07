@@ -62,7 +62,7 @@ tram() {
     fi
     deltasec=$(("$tramsec" - "$currentsec"))
     if (( "$deltasec" > 43200 )); then
-      echo -e "\e[31m> ${schedules[i]} \e[0m•\e[33m Alredy happened\e[0m"
+      echo -e "\e[31m> ${schedules[i]} \e[0m•\e[31m Alredy happened\e[0m"
     else
       minutes=$(("$deltasec" / 60))
       seconds=$(("$deltasec" % 60))

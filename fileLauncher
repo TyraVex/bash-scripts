@@ -22,7 +22,6 @@ r() {
     filename="${basename%%.*}"
     ext=".${basename##*.}"
     pwd=$(pwd)
-    trap 'cd $pwd' 2 3
     cd $(dirname "$last_script")
   else
     if [[ "$last_script" == *"/data/data/com.termux/files/home"* ]]; then
