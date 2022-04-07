@@ -6,7 +6,6 @@ r() {
   unset filename
   last_script=$(cat ~/.temp/last/script)
 
-
   # checking target
   if [[ -n "$1" ]]; then
     if [[ -f "$1" ]]; then
@@ -14,14 +13,17 @@ r() {
       filename="${1%%.*}"
       ext=".${1##*.}"
       printf "$(pwd)/$1" > ~/.temp/last/script
+      pwd='.'
     else
       echo "Target is not accessible"
     fi
   elif [[ -f "$last_script" ]]; then
-    path=
     basename=$(basename -- "$last_script")
     filename="${basename%%.*}"
     ext=".${basename##*.}"
+    pwd=$(pwd)
+    trap 'cd $pwd' 2 3
+    cd $(dirname "$last_script")
   else
     if [[ "$last_script" == *"/data/data/com.termux/files/home"* ]]; then
       readablePath=$(sed 's:\/data\/data\/com\.termux\/files\/home:\~:g' <<< "$last_script")
@@ -30,15 +32,13 @@ r() {
     echo "($readablePath)"
   fi
 
-
   # executing target
   if [[ -n "$filename" ]]; then
     if [[ ! "$basename" == *"."* ]]; then
       unset ext
     fi
-    cd $(dirname "$last_script")
-    if [[ $(head -c 3 "$last_script") == "#!/" || "$ext" == ".sh" ]]; then
-      chmod +x "$last_script" && bash "$last_script" "${@:2}"
+    if [[ $(head -c 3 "$filename$ext") == "#!/" || "$ext" == ".sh" ]]; then
+      chmod +x "$filename$ext" && ./"$filename$ext" "${@:2}"
     elif [[ "$ext" == ".c" ]]; then
       ({ while kill -0 "$$"; do sleep 10; done; rm "$filename.exe"; } > /dev/null 2>&1 &)
       gcc -Wall -Wextra -Werror "$filename$ext" -o "$filename".exe -lm \
@@ -53,9 +53,16 @@ r() {
       && proot java "$filename" "${@:2}"
     elif [[ "$ext" == ".class" ]]; then
       proot java "$filename" "${@:2}"
+    elif [[ "$ext" == ".py" ]]; then
+      python3 "$filename$ext" "${@:2}"
     else
       echo "File type isn't supported"
     fi
   fi
 
+}
+
+# go back
+b() {
+  cd "$pwd"
 }
