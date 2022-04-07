@@ -81,7 +81,7 @@ g() {
       F) git pull origin main --rebase;;
       r) read -p 'commit new name ? ' commit
          if [[ -n "$commit" ]]; then
-           git commit --amend -m "$commmit"
+           git commit --amend -m "$commit"
          fi;;
       d) git reset --hard HEAD^;;
 
