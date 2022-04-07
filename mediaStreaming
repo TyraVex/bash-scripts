@@ -1,67 +1,6 @@
 #!/bin/bash
 
 
-# magnet scraper and torrent streamer
-
-
-# music player
-
-mp() {
-
-  type=music
-  $(play "$*" > /dev/null &)
-
-}
-
-
-# video player
-
-vp() {
-
-  type=video
-  $(play "$*" > /dev/null &)
-
-}
-
-
-# launch video via VLC
-
-startvideo() {
-
-  if [[ $(whoami) == "tyra" ]]; then
-    mpv "$1" &
-  else
-    $(am start --user 0 -a android.intent.action.VIEW -t video/mpeg -d "$1" > /dev/null 2>&1 &)
-  fi
-
-}
-
-
-# play music via VLC
-
-startaudio() {
-
-  if [[ $(whoami) == "tyra" ]]; then
-    mpv "$1" &
-  else
-    $(am start --user 0 -a android.intent.action.VIEW -t audio/wav -d "$1" > /dev/null 2>&1 &)
-  fi
-
-}
-
-
-# retrieve url of media source
-
-geturl() {
-
-  out=$(yt-dlp --get-url "$1")
-  if [[ -n "$out" ]]; then
-    echo "$out"
-  fi
-
-}
-
-
 # plays youtube links or queries
 
 play() {
@@ -86,4 +25,34 @@ play() {
     startaudio "$url"
   fi
 
+}
+
+# music player
+mp() {
+  type=music
+  $(play "$*" > /dev/null &)
+}
+
+# video player
+vp() {
+  type=video
+  $(play "$*" > /dev/null &)
+}
+
+# launch video via VLC
+startvideo() {
+  $(am start --user 0 -a android.intent.action.VIEW -t video/mpeg -d "$1" > /dev/null 2>&1 &)
+}
+
+# play music via VLC
+startaudio() {
+  $(am start --user 0 -a android.intent.action.VIEW -t audio/wav -d "$1" > /dev/null 2>&1 &)
+}
+
+# retrieve url of media source
+geturl() {
+  out=$(yt-dlp --get-url "$1")
+  if [[ -n "$out" ]]; then
+    echo "$out"
+  fi
 }

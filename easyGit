@@ -48,8 +48,8 @@ g() {
        if [[ -n "$gitignore" ]]; then
          echo "$gitignore" > .gitignore
        fi
-       read -p "to add " toAdd
-       if [[ -n "$gitignore" ]]; then
+       read -p "files to add : " toAdd
+       if [[ -n "$toAdd" ]]; then
          git add "$toAdd"
        fi
        git commit -m 'initial commit'

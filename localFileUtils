@@ -9,17 +9,6 @@ ren() {
   done
 }
 
-# backup (TERMUX-WSL)
-alias bkp=' \
-  if [[ -d /sdcard/Download/Shared ]]; then \
-    cd ~/../
-    zip -q -r /sdcard/Download/Shared/backup.zip home/; \
-    cd
-  else \
-    zip -q -r ~/backup.zip ~/; \
-  fi \
-'
-
 # share files TO vm (PROOT-DISTRO)
 shrvm() {
   cp -r "$1" "$ub"/

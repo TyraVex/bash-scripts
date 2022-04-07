@@ -41,45 +41,45 @@ sp() {
 
 }
 
-# tidal downloader
+# tidal downloader (ARCHIVED)
 
-td() {
-
-  unset ids titles names albums duration popularity audioQuality choice lines
-  if [[ -z "$1" ]]; then
-    echo "No input"
-    return
-  fi
-  query=$(printf '%s' "$*" | tr ' ' '-' )
-  out=$(curl -s "https://api.tidal.com/v1/search/tracks?countryCode=US&query=$query" -H 'x-tidal-token: zU4XHVVkc2tDPo4t' | jq)
-  readarray -t ids <<< $(grep -B2 '"duration":' <<< "$out" | grep -Po '(?<="id": )[0-9]+(?=,)')
-  readarray -t titles <<< $(grep -B1 '"duration":' <<< "$out" | grep -Po '(?<="title": ").+(?=",)')
-  readarray -t version <<< $(perl -pe 's:^(?=.): - :g' <<< "$(grep -Po '(?<="version": ").+(?=",)' <<< "$out")")
-  readarray -t names <<< $(grep -A2 '"artist":' <<< "$out" | grep -Po '(?<="name": ").+(?=",)')
-  readarray -t albums <<< $(grep -A2 '"album":' <<< "$out" | grep -Po '(?<="title": ").+(?=",)')
-  readarray -t duration <<< $(grep -Po '(?<="duration": )[0-9]+(?=,)' <<< "$out")
-  readarray -t popularity <<< $(grep -Po '(?<="popularity": )[0-9]+(?=,)' <<< "$out")
-  readarray -t audioQuality <<< $(grep -Po '(?<="audioQuality": ").+(?=",)' <<< "$out")
-
-  echo
-  for ((i=0; i < "${#ids[@]}"; i++)); do
-
-    case "${audioQuality[i]}" in
-      "HIGH") num="${red}$i${NC}";;
-      "HI_RES") num="${green}$i${NC}";;
-      "LOSSLESS") num="${blue}$i${NC}";;
-      *) num="$i"
-    esac
-
-    echo -e "$num : ${yellow}${popularity[i]}%${NC} • ${green}${duration[i]}${NC} • ${titles[i]}${version[i]}"
-    echo -e "    ${red}${names[i]}${NC} • ${blue}${albums[i]}${NC}"
-    echo
-
-  done
-  read -p "Choice : " choice
-  if [[ -z "$choice" ]]; then
-    return
-  fi
-  tidal-dl -l "http://www.tidal.com/track/${ids[choice]}"
-
-}
+#td() {
+#
+#  unset ids titles names albums duration popularity audioQuality choice lines
+#  if [[ -z "$1" ]]; then
+#    echo "No input"
+#    return
+#  fi
+#  query=$(printf '%s' "$*" | tr ' ' '-' )
+#  out=$(curl -s "https://api.tidal.com/v1/search/tracks?countryCode=US&query=$query" -H 'x-tidal-token: zU4XHVVkc2tDPo4t' | jq)
+#  readarray -t ids <<< $(grep -B2 '"duration":' <<< "$out" | grep -Po '(?<="id": )[0-9]+(?=,)')
+#  readarray -t titles <<< $(grep -B1 '"duration":' <<< "$out" | grep -Po '(?<="title": ").+(?=",)')
+#  readarray -t version <<< $(perl -pe 's:^(?=.): - :g' <<< "$(grep -Po '(?<="version": ").+(?=",)' <<< "$out")")
+#  readarray -t names <<< $(grep -A2 '"artist":' <<< "$out" | grep -Po '(?<="name": ").+(?=",)')
+#  readarray -t albums <<< $(grep -A2 '"album":' <<< "$out" | grep -Po '(?<="title": ").+(?=",)')
+#  readarray -t duration <<< $(grep -Po '(?<="duration": )[0-9]+(?=,)' <<< "$out")
+#  readarray -t popularity <<< $(grep -Po '(?<="popularity": )[0-9]+(?=,)' <<< "$out")
+#  readarray -t audioQuality <<< $(grep -Po '(?<="audioQuality": ").+(?=",)' <<< "$out")
+#
+#  echo
+#  for ((i=0; i < "${#ids[@]}"; i++)); do
+#
+#    case "${audioQuality[i]}" in
+#      "HIGH") num="${red}$i${NC}";;
+#      "HI_RES") num="${green}$i${NC}";;
+#      "LOSSLESS") num="${blue}$i${NC}";;
+#      *) num="$i"
+#    esac
+#
+#    echo -e "$num : ${yellow}${popularity[i]}%${NC} • ${green}${duration[i]}${NC} • ${titles[i]}${version[i]}"
+#    echo -e "    ${red}${names[i]}${NC} • ${blue}${albums[i]}${NC}"
+#    echo
+#
+#  done
+#  read -p "Choice : " choice
+#  if [[ -z "$choice" ]]; then
+#    return
+#  fi
+#  tidal-dl -l "http://www.tidal.com/track/${ids[choice]}"
+#
+#}
