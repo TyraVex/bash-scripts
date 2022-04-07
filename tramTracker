@@ -32,8 +32,11 @@ tram() {
   echo "$station > $direction"
   station=$(printf '%s' "$station" | tr ' ' '+' | tr '[:lower:]' '[:upper:]')
   direction=$(printf '%s' "$direction" | tr ' ' '+' | tr '[:lower:]' '[:upper:]')
-  readarray -t schedules <<< $(curl -s "https://opendata.lillemetropole.fr/api/records/1.0/search/?dataset=ilevia-prochainspassages&timezone=CET&refine.nomstation=$station&refine.sensligne=$direction" \
-  | jq | grep "heureestimeedepart" | egrep -o '[0-9]{2}:[0-9]{2}:[0-9]{2}')
+  passages=$(curl -s "https://opendata.lillemetropole.fr/api/records/1.0/search/?dataset=ilevia-prochainspassages&timezone=CET&refine.nomstation=$station&refine.sensligne=$direction")
+  readarray -t departures <<< $(echo "$passages" | jq -r .records[].fields.heureestimeedepart)
+  for ((i=0; i < "${#departures[@]}"; i++)); do
+    schedules[i]="${departures[i]:11:-6}"
+  done
 
   # watchdog
   if [[ -z "$schedules" ]]; then

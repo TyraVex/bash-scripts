@@ -16,12 +16,11 @@ g() {
       echo
       echo -e '\e[32m[c] - commit current\e[0m'
       echo -e '\e[32m[C] - commit all\e[0m'
-      echo -e '\e[32m[p] - push\e[0m'
-      echo -e '\e[32m[f] - push -f\e[0m'
+      echo -e '\e[32m[r] - rename commit\e[0m'
+      echo -e '\e[32m[d] - delete commit\e[0m'
       echo
-      echo -e '\e[35m[r] - rename commit\e[0m'
-      echo -e '\e[35m[d] - delete commit\e[0m'
-      echo
+      echo -e '\e[34m[p] - push\e[0m'
+      echo -e '\e[34m[f] - push -f\e[0m'
       echo -e '\e[34m[P] - pull\e[0m'
       echo -e '\e[34m[F] - pull -f\e[0m'
       echo
@@ -37,87 +36,75 @@ g() {
   else
     choice="$1"
   fi
-  case "$choice" in
-    i) git init; git branch -m main;;
-    s) git init; git branch -m main
-       read -p 'url : ' url
-       if [[ -n "$url" ]]; then
-         git remote add origin "$url"
-       fi
-       read -p 'gitignore : ' gitignore
-       if [[ -n "$gitignore" ]]; then
-         echo "$gitignore" > .gitignore
-       fi
-       read -p "files to add : " toAdd
-       if [[ -n "$toAdd" ]]; then
-         git add "$toAdd"
-       fi
-       git commit -m 'initial commit'
-       read -p "push ? " push
-       if [[ "$push" == 'y' ]]; then
-         git push origin main
-       fi;;
-    c) read -p 'commit name ? ' commit
-       if [[ -n "$commit" ]]; then
-         git commit -am "$commit"
-       else
-         git commit -am 'update'
-       fi;;
-    C) read -p 'commit name ? ' commit
-       git add *
-       if [[ -n "$commit" ]]; then
-         git commit -m "$commit"
-       else
-         git commit -m 'update'
-       fi;;
-    cp)read -p 'commit name ? ' commit
-       if [[ -n "$commit" ]]; then
-         git commit -am "$commit"
-       else
-         git commit -am 'update'
-       fi
-       git push origin main;;
-    Cp)read -p 'commit name ? ' commit
-       git add *
-       if [[ -n "$commit" ]]; then
-         git commit -m "$commit"
-       else
-         git commit -m 'update'
-       fi
-       git push origin main;;
-    cf) read -p 'commit name ? ' commit
-       if [[ -n "$commit" ]]; then
-         git commit -am "$commit"
-       else
-         git commit -am 'update'
-       fi
-       git push origin main -f;;
-    Cf)read -p 'commit name ? ' commit
-       git add *
-       if [[ -n "$commit" ]]; then
-         git commit -m "$commit"
-       else
-         git commit -m 'update'
-       fi
-       git push origin main -f;;
-    p) git push origin main;;
-    f) git push origin main -f;;
-    P) git pull origin main;;
-    F) git pull origin main -f;;
-    r) git commit --amend -m "$*";;
-    d) git reset --hard HEAD^;;
-    u) read -p 'url ? ' url
-       if [[ -n "$url" ]]; then
-         git remote set-url origin "$url"
-       fi;;
-    b) read -p 'branch ? ' branch
-       if [[ -n "$branch" ]]; then
-         git branch -m "$branch"
-       fi;;
-    c) git checkout
-       read -p 'file ? ' file
-       if [[ -n "$file" ]]; then
-         git checkout "$file"
-       fi;;
-  esac
+
+  for ((i=0; i < ${#choice[0]}; i++)); do
+
+    case "${choice:i:1}" in
+
+      i) git init; git branch -m main;;
+      s) git init; git branch -m main
+         read -p 'url : ' url
+         if [[ -n "$url" ]]; then
+           git remote add origin "$url"
+         fi
+         read -p 'gitignore : ' gitignore
+         if [[ -n "$gitignore" ]]; then
+           echo "$gitignore" > .gitignore
+         fi
+         read -p "files to add : " toAdd
+         if [[ -n "$toAdd" ]]; then
+           git add "$toAdd"
+         fi
+         git commit -m 'initial commit'
+         read -p "push ? " push
+         if [[ "$push" == 'y' ]]; then
+           git push origin main
+         fi;;
+
+      c) read -p 'commit name ? ' commit
+         if [[ -n "$commit" ]]; then
+           git commit -am "$commit"
+         else
+           git commit -am 'update'
+         fi;;
+      C) read -p 'commit name ? ' commit
+         git add *
+         if [[ -n "$commit" ]]; then
+           git commit -m "$commit"
+         else
+           git commit -m 'update'
+         fi;;
+
+      p) git push origin main;;
+      f) git push origin main -f;;
+      P) git pull origin main;;
+      F) git pull origin main --rebase;;
+      r) read -p 'commit new name ? ' commit
+         if [[ -n "$commit" ]]; then
+           git commit --amend -m "$commmit"
+         fi;;
+      d) git reset --hard HEAD^;;
+
+      u) read -p 'url ? ' url
+         if [[ -n "$url" ]]; then
+           git remote set-url origin "$url"
+         fi;;
+      b) read -p 'branch ? ' branch
+         if [[ -n "$branch" ]]; then
+           git branch -m "$branch"
+         fi;;
+      c) git checkout
+         read -p 'file ? ' file
+         if [[ -n "$file" ]]; then
+           git checkout "$file"
+         fi;;
+      e) echo -e '\e[33Abording...\e[0m\n'
+         return;;
+      *) echo -e "\e[31Invalid input '${choice:i:1}'\e[0m\n"
+         return;;
+
+    esac
+
+  done
+
 }
