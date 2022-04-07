@@ -76,4 +76,4 @@ int main(void)
 }
 
 //    printf("%d : %s\n\n", l, valid[l]);
-//      printf("%d > %s\n", searchIndex, valid[searchIndex]);
+//    printf("%d > %s\n", searchIndex, valid[searchIndex]);
