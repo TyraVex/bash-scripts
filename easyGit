@@ -32,12 +32,11 @@ g() {
       echo
     fi
     read -p 'Choice : ' choice
-    choice=($choice)
   else
     choice="$1"
   fi
 
-  for ((i=0; i < ${#choice[0]}; i++)); do
+  for ((i=0; i < "${#choice[0]}"; i++)); do
 
     case "${choice:i:1}" in
 
