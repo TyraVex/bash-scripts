@@ -36,6 +36,7 @@ vid() {
 
 sp() {
 
+  trap 'rm .spot-dl; return' 2 3
   cd /sdcard/Download/Shared/
   spotdl "$*" --st 20 --dt 5;
 

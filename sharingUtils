@@ -83,7 +83,7 @@ sgo() {
   if [[ ! "$url" =~ ^https?\:\/\/ ]]; then url="https://$url"; fi
   request=$(curl -s 'https://api.go.ly/api/v1/link/public' \
   -H 'content-type: application/json' \
-  -d '{"UserID":740,"Type":0,"DomainID":2,"Payload":{"Destination":"'"$url"'"}}')
+  -d '{"UserID":'"$GOLY_USER_ID"',"Type":0,"DomainID":2,"Payload":{"Destination":"'"$url"'"}}')
   link="go.ly/$(jq -r .Slug <<< $request)"
   echo
   echo "$url"

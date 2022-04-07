@@ -88,8 +88,8 @@ g() {
          fi;;
       d) read -p 'delete last commit ? ' choice
          if [[ "$choice" == 'y' ]]; then
-           git reset --hard HEAD^;;
-         fi
+           git reset --hard HEAD^
+         fi;;
       u) read -p 'url ? ' url
          if [[ -n "$url" ]]; then
            git remote set-url origin "$url"
