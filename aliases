@@ -1,6 +1,11 @@
 #!/bin/bash
 
 
+# initialisation
+
+PS1='\[\e[0;32m\]\w\[\e[0m\] '
+printf '\e[6 q'
+
 # aliases
 
 alias c='clear'
@@ -11,6 +16,7 @@ alias .....='cd ../../../..'
 alias e='logout; exit'
 alias vm='proot-distro login ubuntu'
 alias a='nano ~/.bashrc; source ~/.bashrc'
+alias src='source ~/.bashrc'
 alias ccc='rm /data/data/com.termux/files/usr/tmp/* -rf'
 alias u='apt update; apt upgrade; apt autoremove'
 alias ls='ls --color --group-directories-first -t -X'

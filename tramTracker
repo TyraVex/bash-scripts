@@ -34,10 +34,14 @@ tram() {
   direction=$(printf '%s' "$direction" | tr ' ' '+' | tr '[:lower:]' '[:upper:]')
   passages=$(curl -s "https://opendata.lillemetropole.fr/api/records/1.0/search/?dataset=ilevia-prochainspassages&timezone=CET&refine.nomstation=$station&refine.sensligne=$direction")
   readarray -t departures <<< $(echo "$passages" | jq -r .records[].fields.heureestimeedepart)
+  updatedTemp=$(echo "$passages" | jq -r .records[].fields.datemodification)
   for ((i=0; i < "${#departures[@]}"; i++)); do
     schedules[i]="${departures[i]:11:-6}"
+    updated[i]="${updatedTemp[i]:11:-6}"
   done
-
+  echo "$updatedTemp"
+  echo "${updated[@]}"
+  return
   # watchdog
   if [[ -z "$schedules" ]]; then
     echo "Service down or wrong station name"
@@ -65,7 +69,7 @@ tram() {
       if (( "$seconds" < 10 )); then
         seconds="0$seconds"
       fi
-      echo "${schedules[i]} > In $minutes:$seconds"
+      echo "${schedules[i]} > In $minutes:$seconds > updated : ${updated[i]}"
     fi
   done
 

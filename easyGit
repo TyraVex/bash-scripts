@@ -4,8 +4,12 @@ g() {
   if [[ -z "$1" ]]; then
     clear
     if [[ ! -d .git ]]; then
+      echo -e "\e[35m> No repo found\e[0m"
+      echo
       echo -e '\e[34m[i] - init\e[0m'
       echo -e '\e[34m[s] - setup\e[0m'
+      echo
+      echo -e "\e[31m[e] - exit\e[0m"
       echo
     else
       url="$(git config --get remote.origin.url)"
@@ -27,8 +31,9 @@ g() {
       echo -e "\e[33m[b] - edit branch\e[0m"
       echo -e '\e[33m[o] - checkout\e[0m'
       echo -e "\e[33m[u] - edit url\e[0m"
+      echo -e "\e[33m[h] - history\e[0m"
       echo
-      echo -e "\e[31m[e] - Exit\e[0m"
+      echo -e "\e[31m[e] - exit\e[0m"
       echo
     fi
     read -p 'Choice : ' choice
@@ -81,7 +86,11 @@ g() {
       p) git push origin main;;
       f) git push origin main -f;;
       P) git pull origin main;;
-      F) git pull origin main --rebase;;
+      F) read -p 'rebase ? ' choice
+         if [[ "$choice" == 'y' ]]; then
+           git commit -am 'before rebase'
+           git pull origin main --rebase
+         fi;;
       r) read -p 'commit new name ? ' commit
          if [[ -n "$commit" ]]; then
            git commit --amend -m "$commit"
@@ -103,9 +112,10 @@ g() {
          if [[ -n "$file" ]]; then
            git checkout "$file"
          fi;;
-      e) echo -e '\e[33Abording...\e[0m'
+      h) git reflog;;
+      e) echo -e '\e[33mAbording...\e[0m\n'
          return;;
-      *) echo -e "\e[31Invalid input '${choice:i:1}'\e[0m"
+      *) echo -e "\e[31mInvalid input '${choice:i:1}'\e[0m\n"
          return;;
 
     esac

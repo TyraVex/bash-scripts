@@ -38,7 +38,7 @@ upl() {
 
 anon() {
 
-  link=$(curl -s -F "file=@$1" "https://api.anonfiles.com/upload?token=$ANONFILES_API_KEY" \
+  link=$(curl -# -F "file=@$1" "https://api.anonfiles.com/upload?token=$ANONFILES_API_KEY" \
   | jq -r .data.file.url.full)
   if [[ -z "$link" ]]; then
     echo "Failed"
