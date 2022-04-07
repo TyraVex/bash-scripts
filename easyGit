@@ -32,12 +32,16 @@ g() {
       echo
     fi
     read -p 'Choice : ' choice
+    if [[ -z "$choice" ]]; then
+      choice='cp'
+    fi
   else
     choice="$1"
   fi
 
   for ((i=0; i < "${#choice[0]}"; i++)); do
 
+    echo
     case "${choice:i:1}" in
 
       i) git init; git branch -m main;;
@@ -82,8 +86,10 @@ g() {
          if [[ -n "$commit" ]]; then
            git commit --amend -m "$commit"
          fi;;
-      d) git reset --hard HEAD^;;
-
+      d) read -p 'delete last commit ? ' choice
+         if [[ "$choice" == 'y' ]]; then
+           git reset --hard HEAD^;;
+         fi
       u) read -p 'url ? ' url
          if [[ -n "$url" ]]; then
            git remote set-url origin "$url"
