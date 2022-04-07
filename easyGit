@@ -103,13 +103,14 @@ g() {
          if [[ -n "$file" ]]; then
            git checkout "$file"
          fi;;
-      e) echo -e '\e[33Abording...\e[0m\n'
+      e) echo -e '\e[33Abording...\e[0m'
          return;;
-      *) echo -e "\e[31Invalid input '${choice:i:1}'\e[0m\n"
+      *) echo -e "\e[31Invalid input '${choice:i:1}'\e[0m"
          return;;
 
     esac
 
   done
+  echo
 
 }
