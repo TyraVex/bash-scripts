@@ -40,7 +40,7 @@ tram() {
     updated[i]="${updatedTemp[i]:11:-6}"
   done
   echo "$updatedTemp"
-  echo "${updated[@]}"
+  echo "${schedules[@]}"
   return
   # watchdog
   if [[ -z "$schedules" ]]; then

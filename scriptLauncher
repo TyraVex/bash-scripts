@@ -18,6 +18,7 @@ r() {
       echo "Target is not accessible"
     fi
   elif [[ -f "$last_script" ]]; then
+    path=
     basename=$(basename -- "$last_script")
     filename="${basename%%.*}"
     ext=".${basename##*.}"
@@ -35,8 +36,9 @@ r() {
     if [[ ! "$basename" == *"."* ]]; then
       unset ext
     fi
-    if [[ $(head -c 3 "$filename$ext") == "#!/" || "$ext" == ".sh" ]]; then
-      chmod +x "$filename$ext" && ./"$filename$ext" "${@:2}"
+    cd $(dirname "$last_script")
+    if [[ $(head -c 3 "$last_script") == "#!/" || "$ext" == ".sh" ]]; then
+      chmod +x "$last_script" && bash "$last_script" "${@:2}"
     elif [[ "$ext" == ".c" ]]; then
       ({ while kill -0 "$$"; do sleep 10; done; rm "$filename.exe"; } > /dev/null 2>&1 &)
       gcc -Wall -Wextra -Werror "$filename$ext" -o "$filename".exe -lm \
