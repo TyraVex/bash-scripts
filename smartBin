@@ -4,7 +4,7 @@ d() {
 
   # initialisation
   unset files renamed
-  mkdir -p .temp/ .temp/trash
+  mkdir -p ~/.temp/ ~/.temp/trash
   date=$(date +%m-%d+%H:%M:%S)
   files=("$@")
 
