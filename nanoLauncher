@@ -1,0 +1,28 @@
+#!/bin/bash
+
+n() {
+
+  unset file last args validArgs create
+  args=($@)
+  for ((i=0; i < "${#args[@]}"; i++)); do
+    if [[ -f "${args[i]}" ]]; then
+      file="${args[i]}"
+    elif [[ "${args[i]:0:1}" == '-' ]]; then
+      validArgs+=("${args[i]}")
+    else
+      create=true
+    fi
+  done
+  last=$(<~/.temp/last/nano)
+  last="${last##*$'\n'}"
+  if [[ -n "$create" ]]; then
+    nano "${args[@]}"
+  elif [[ -n "$file" ]]; then
+    echo "$(readlink -f $file) ${validArgs[@]}" >> ~/.temp/last/nano
+    nano "${args[@]}"
+  elif [[ -n "$last" ]]; then
+    toExec="nano $last ${validArgs[@]}"
+    $toExec
+  fi
+
+}
