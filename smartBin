@@ -4,15 +4,14 @@ d() {
 
   # initialisation
   unset files renamed
+  mkdir -p .temp/ .temp/trash
   date=$(date +%m-%d+%H:%M:%S)
-  args="$*"
   files=("$@")
 
   # renamming and moving files
   for ((i=0; i < "${#files[@]}"; i++)); do
     renamed[i]=$(echo "$date-"$(basename -- "${files[i]}"))
-    # echo "moving ${files[i]}"
-    # echo "to ~/.temp/trash/${renamed[i]}"
+    # echo "mv ${files[i]} ~/.temp/trash/${renamed[i]}"
     mv "${files[i]}" ~/.temp/trash/"${renamed[i]}" 2>/dev/null
   done
 
