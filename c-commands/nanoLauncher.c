@@ -35,13 +35,15 @@ int main(void)
   }
   fclose(nanoHistory);
 
-  // check file pathsk
+  // check file path
   for(int j=0; j < i; j++)
   {
+    printf("%s%s%s\n","FILE* testHistory = fopen(",path[j],", \"r\");");
     FILE* testHistory = fopen(path[j], "r");
-    if(testHistory)
+    if(testHistory == NULL)
     {
-      fclose(testHistory);
+      puts("success");
+//      fclose(testHistory);
       strcpy(valid[k], path[j]);
       k++;
     }
