@@ -7,7 +7,6 @@ up() {
 
   # init
   unset file link
-  trap 'unset file link; return' 2 3
   if [[ "$1" =~ [a|g|G] ]]; then
     choice="$1"
   elif [[ "$2" =~ [a|g|G] ]]; then
