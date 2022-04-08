@@ -36,10 +36,10 @@ vid() {
 
 sp() {
 
-  trap '/bin/rm .spot-dl; return' 2 3
+  trap 'rm .spot-dl; return' 2 3
   cd /sdcard/Download/Shared/
   spotdl "$*" --st 20 --dt 5;
-  /bin/rm .spot-dl
+  rm .spot-dl
 
 }
 

@@ -33,7 +33,7 @@ avg() {
 
 # zip content listing
 7zl() {
-  7za l "$1" | grep -v -e .git -e node_modules | tail -n+21 | head -n-2 | awk '{print $5}' | grep -v ^0$ | tail -n+2
+  7za l "$1" | tail -n+21 | head -n-2 | awk '{print $5}' | grep -v -e ^'0'$ -e '.git/' -e 'node_modules/' | tail -n+2
 }
 
 # share files TO vm (PROOT-DISTRO)

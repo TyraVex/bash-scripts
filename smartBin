@@ -1,39 +1,32 @@
 #!/bin/bash
 
-rm() {
+d() {
 
   # initialisation
   unset files renamed
   date=$(date +%m-%d+%H:%M:%S)
   args="$*"
-  if [[ "$args" =~ '-'[rf][fr]? ]]; then
-    removal='/bin/rm -rf '"$args"
-    $removal
-    echo "Permanently removed $(($(wc -w <<< $cleaned)-1)) elements"
-  else
-    files=("$@")
+  files=("$@")
 
-    # renamming and moving files
-    for ((i=0; i < "${#files[@]}"; i++)); do
-      renamed[i]=$(echo "$date-"$(basename -- "${files[i]}"))
-      # echo "moving ${files[i]}"
-      # echo "to ~/.temp/trash/${renamed[i]}"
-      mv "${files[i]}" ~/.temp/trash/"${renamed[i]}" 2>/dev/null
-    done
+  # renamming and moving files
+  for ((i=0; i < "${#files[@]}"; i++)); do
+    renamed[i]=$(echo "$date-"$(basename -- "${files[i]}"))
+    # echo "moving ${files[i]}"
+    # echo "to ~/.temp/trash/${renamed[i]}"
+    mv "${files[i]}" ~/.temp/trash/"${renamed[i]}" 2>/dev/null
+  done
 
-    # recap / analyse
-    if [[ "$?" == 0 ]]; then
-      if [[ "${#files[@]}" == 0 ]]; then
-        echo "No elements were removed"
-      elif [[ "${#files[@]}" == 1 ]]; then
-        echo "Removed ${#files[@]} element"
-      else
-        echo "Moved ${#files[@]} elements to trash"
-      fi
+  # recap / analyse
+  if [[ "$?" == 0 ]]; then
+    if [[ "${#files[@]}" == 0 ]]; then
+      echo "No elements were removed"
+    elif [[ "${#files[@]}" == 1 ]]; then
+      echo "Removed ${#files[@]} element"
     else
-      echo "Failed"
+      echo "Moved ${#files[@]} elements to trash"
     fi
-
+  else
+    echo "Failed"
   fi
 
 }

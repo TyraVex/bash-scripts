@@ -39,16 +39,16 @@ r() {
     if [[ $(head -c 3 "$filename$ext") == "#!/" || "$ext" == ".sh" ]]; then
       chmod +x "$filename$ext" && ./"$filename$ext" "${@:2}"
     elif [[ "$ext" == ".c" ]]; then
-      ({ while kill -0 "$$"; do sleep 10; done; /bin/rm "$filename.exe"; } > /dev/null 2>&1 &)
+      ({ while kill -0 "$$"; do sleep 10; done; rm "$filename.exe"; } > /dev/null 2>&1 &)
       gcc -Wall -Wextra -Werror "$filename$ext" -o "$filename".exe -lm \
-      && (sleep 1 && /bin/rm "$filename".exe &) \
+      && (sleep 1 && rm "$filename".exe &) \
       && ./"$filename".exe "${@:2}"
     elif [[ "$ext" == ".exe" ]]; then
       exec ./"$filename$ext" "${@:2}"
     elif [[ "$ext" == ".java" ]]; then
-      ({ while kill -0 "$$"; do sleep 10; done; /bin/rm "$filename.class"; } > /dev/null 2>&1 &)
+      ({ while kill -0 "$$"; do sleep 10; done; rm "$filename.class"; } > /dev/null 2>&1 &)
       proot javac "$filename.java" \
-      && (sleep 1 && /bin/rm "$filename.class" &) \
+      && (sleep 1 && rm "$filename.class" &) \
       && proot java "$filename" "${@:2}"
     elif [[ "$ext" == ".class" ]]; then
       proot java "$filename" "${@:2}"
