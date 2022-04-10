@@ -13,6 +13,7 @@ n() {
       create=true
     fi
   done
+  mkdir -p ~/.temp ~/.temp/last
   last=$(<~/.temp/last/nano)
   last="${last##*$'\n'}"
   if [[ -n "$create" ]]; then

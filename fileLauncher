@@ -4,6 +4,7 @@ r() {
 
   # initialisation
   unset filename
+  mkdir -p ~/.temp ~/.temp/last
   last_script=$(cat ~/.temp/last/script)
 
   # checking target

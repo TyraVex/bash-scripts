@@ -7,9 +7,10 @@ up() {
 
   # init
   unset file link
-  if [[ "$1" =~ [a|g|d|G] ]]; then
+  regex="^[a|g|d|G]+$"
+  if [[ "$1" =~ $regex ]]; then
     choice="$1"
-  elif [[ "$2" =~ [a|g|d|G] ]]; then
+  elif [[ "$2" =~ $regex ]]; then
     choice="$2"
   else
     echo
@@ -36,6 +37,7 @@ up() {
   elif [[ -f "$2" ]]; then
     file="$2"
   else
+    echo
     read -p 'file : ' file
     if [[ ! -s "$file" ]]; then
       echo -e '\e[31mInvalid file\e[0m\n'
@@ -52,8 +54,8 @@ up() {
       G) serv=$(curl -s 'https://api.gofile.io/getServer' | jq -r .data.server)
          link=$(curl -# -F token="$GOFILE_API_KEY" -F folderId="$GOFILE_PRIVATE_FOLDER_ID" -F "file=@$file" "https://$serv.gofile.io/uploadFile" | jq -r .data.downloadPage);;
       a) link=$(curl -# -F "file=@$file" "https://api.anonfiles.com/upload?token=$ANONFILES_API_KEY" | jq -r .data.file.url.full);;
-      d) curl -# -X POST 'https://content.dropboxapi.com/2/files/upload' -H "Authorization: Bearer $DROPBOX_API_KEY" -H "Dropbox-API-Arg: {\"path\": \"/Uploads/$file\",\"mode\": \"overwrite\",\"autorename\": true,\"mute\": false}" -H "Content-Type: application/octet-stream" -H @"$file" >/dev/null
-         link=$(curl -s -X POST -L 'https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings' -H "Authorization: Bearer $DROPBOX_API_KEY" -d "{\"path\": \"/Uploads/$file\",\"settings\": {\"requested_visibility\": \"public\"}}" -H "Content-Type: application/json" | jq -r .url)
+      d) curl -# -X POST 'https://content.dropboxapi.com/2/files/upload' -H "Authorization: Bearer $DROPBOX_API_KEY" -H "Dropbox-API-Arg: {\"path\": \"/Uploads/$file\",\"mode\": \"overwrite\",\"autorename\": true,\"mute\": false}" -H "Content-Type: application/octet-stream" -H @"$file" #>/dev/null
+         link=$(curl -L -s -X POST -L 'https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings' -H "Authorization: Bearer $DROPBOX_API_KEY" -d "{\"path\": \"/Uploads/$file\",\"settings\": {\"requested_visibility\": \"public\"}}" -H "Content-Type: application/json" | jq -r)
          link="${link:0:-1}1";;
       s) if [[ -n "$link" ]]; then
            sgo "$link"

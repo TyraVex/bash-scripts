@@ -15,6 +15,7 @@ t() {
     # initialisation
     num=1
     unset movies
+    mkdir -p ~/.temp ~/.temp/last
     if [[ -z "$1" ]]; then
       echo "No input"
       return

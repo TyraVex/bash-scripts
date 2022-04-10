@@ -4,6 +4,7 @@
 p() {
 
   # initialisation
+  mkdir -p ~/.temp ~/.temp/last
   touch ~/.temp/last/ai_chat
   unset output toLog
   input="$*"
