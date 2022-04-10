@@ -41,7 +41,7 @@ acc() {
 
 # googler
 
-gl() {
+gg() {
   query=$(printf '%s' "$*" | tr ' ' '+' )
   lynx --cookies "https://www.google.com/search?q=$query"
 }
