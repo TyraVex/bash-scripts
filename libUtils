@@ -19,8 +19,9 @@ url() {
 
 }
 
-finalurl() {
-  curl $1 -s -L -I -o /dev/null -w '%{url_effective}'
+furl() {
+  echo
+  wget -S --spider "$1" 2>&1 | sed -En 's/^--[[:digit:]: -]{19}--  https?:\/\/(.*)/> \1\n/p'
 }
 
 
