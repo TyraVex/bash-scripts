@@ -1,0 +1,25 @@
+#!/bin/bash
+
+addsub() {
+
+  if file -i "$1" | grep -q video; then
+    video="$1"
+  elif file -i "$2" | grep -q video; then
+    video="$2"
+  else
+    echo 'No video found'
+    return
+  fi
+
+  if [[ "$1" =~ ".srt" ]]; then
+    subtitles="$1"
+  elif [[ "$2" =~ ".srt" ]]; then
+    subtitles="$2"
+  else
+    echo 'No subtitles found'
+    return
+  fi
+
+  ffmpeg -i "$video" -i "$subtitles" -c copy -c:s mov_text "${video:0:-4}-subs.mp4"
+
+}
