@@ -33,7 +33,7 @@ ai() {
     fi
   done
   toUse="${history}Human: ${tokens:0:-1}\nAI: "
-  echo "$toUse"
+#  echo "$toUse"
 
   request=$(curl -s 'https://api.openai.com/v1/engines/text-davinci-002/completions' \
     -H "Content-Type: application/json" \
@@ -49,9 +49,6 @@ ai() {
     }'
   )
 
-  echo
-  echo "$request"
-  echo
   output=$(echo "$request" | jq -r .choices[].text)
   output="${output:1}"
   echo -e "Human: ${tokens:0:-1}\nAI: ${output}\n" >> ~/.temp/last/ai-chat
