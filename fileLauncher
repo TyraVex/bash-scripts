@@ -5,6 +5,7 @@ r() {
   # initialisation
   unset filename
   mkdir -p ~/.temp ~/.temp/last
+  touch ~/.temp/last/script
   last_script=$(cat ~/.temp/last/script)
 
   # checking target
