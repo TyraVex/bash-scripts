@@ -56,6 +56,8 @@ r() {
       proot java "$filename" "${@:2}"
     elif [[ "$ext" == ".py" ]]; then
       python3 "$filename$ext" "${@:2}"
+    elif [[ "$ext" == ".jar" ]]; then
+      java -jar "$filename$ext" "${@:2}"
     else
       echo "File type isn't supported"
     fi
