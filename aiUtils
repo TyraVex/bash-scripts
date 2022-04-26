@@ -128,11 +128,12 @@ essay() {
 qna() {
 
   args=($@)
+  tries=0
   temp=1
   words=100
   mkdir -p ~/.temp ~/.temp/last
   touch ~/.temp/last/ai-qna
-  unset tokens history
+  unset tokens history isValid
   for ((i=0; i < "${#args[@]}"; i++)); do
     if [[ "${args[i]}" =~ 't'[0-9]+ ]]; then
       temp="${args[i]//[^0-9]/}"
@@ -157,26 +158,34 @@ qna() {
       tokens+="${args[i]} "
     fi
   done
-  toUse="${history}\nQ: ${tokens:0:-1}\nA: "
-  echo "$toUse"
+  toUse="${history}Q: ${tokens:0:-1}\nA: "
+#  echo "$toUse"
 
-  request=$(curl -s 'https://api.openai.com/v1/engines/text-davinci-002/completions' \
-    -H "Content-Type: application/json" \
-    -H "Authorization: Bearer $OPENAI_API_KEY" \
-    -d '{
-      "prompt": "Q: '"$toUse"'.\nA:",
-      "temperature": '"$temp"',
-      "max_tokens": '"$words"',
-      "top_p": 1,
-      "frequency_penalty": 0.0,
-      "presence_penalty": 0.0,
-      "stop": ["\n"]
-    }'
-  )
+  while [[ -z "$isValid" ]]; do
+    if [[ "$tries" == 5 ]]; then
+      echo -e '\e[31mFailed (5/5). Exiting.\e[0m'
+      return
+    elif (( "$tries" > 0 )); then
+      echo -e "\e[33mFailed ($tries/5). Retrying...\e[0m"
+    fi
+    ((tries++))
+    request=$(curl -s 'https://api.openai.com/v1/engines/text-davinci-002/completions' \
+      -H "Content-Type: application/json" \
+      -H "Authorization: Bearer $OPENAI_API_KEY" \
+      -d '{
+        "prompt": "Q: '"$toUse"'.\nA:",
+        "temperature": '"$temp"',
+        "max_tokens": '"$words"',
+        "top_p": 1,
+        "frequency_penalty": 0.0,
+        "presence_penalty": 0.0,
+        "stop": ["\n"]
+      }'
+    )
+    output=$(echo "$request" | jq -r .choices[].text | tr -s '\n')
+    isValid="${output//[^a-zA-Z0-9]/}"
+  done
 
-  echo "$request"
-
-  output=$(echo "$request" | jq -r .choices[].text | tr -s '\n')
   output="${output:1}"
   echo -e "Q: ${tokens:0:-1}\nA: ${output}\n" >> ~/.temp/last/ai-chat
   if [[ $(echo "$request" | jq -r .choices[].finish_reason) != 'stop' ]]; then

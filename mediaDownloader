@@ -43,6 +43,17 @@ sp() {
 
 }
 
+
+# online youtube downloader
+
+ovid() {
+
+  cd /sdcard/Download/Shared/
+  curl -# -O -J -L "https://projectlounge.pw/ytdl/download?url=$1"
+
+}
+
+
 # tidal downloader (ARCHIVED)
 
 #td() {
@@ -85,3 +96,4 @@ sp() {
 #  tidal-dl -l "http://www.tidal.com/track/${ids[choice]}"
 #
 #}
+#!/bin/bash
