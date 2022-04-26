@@ -54,8 +54,9 @@ ai() {
   echo -e "Human: ${tokens:0:-1}\nAI: ${output}\n" >> ~/.temp/last/ai-chat
   if [[ $(echo "$request" | jq -r .choices[].finish_reason) != 'stop' ]]; then
     output="${output} // MAX WORDS REACHED"
+  else
+    echo "$output"
   fi
-  echo "$output"
 
 }
 
@@ -116,9 +117,72 @@ essay() {
   echo -e "${tokens:0:-1}\n${output}\n" >> ~/.temp/last/ai-essay
   if [[ $(echo "$request" | jq -r .choices[].finish_reason) != 'stop' ]]; then
     output="${output} // MAX WORDS REACHED"
+  else
+    echo
+    echo "$output"
+    echo
   fi
-  echo
-  echo "$output"
-  echo
+
+}
+
+qna() {
+
+  args=($@)
+  temp=1
+  words=100
+  mkdir -p ~/.temp ~/.temp/last
+  touch ~/.temp/last/ai-qna
+  unset tokens history
+  for ((i=0; i < "${#args[@]}"; i++)); do
+    if [[ "${args[i]}" =~ 't'[0-9]+ ]]; then
+      temp="${args[i]//[^0-9]/}"
+      if (("${temp//[^0-9]/}" > 20)); then
+        echo "Max temp is 20. Using this value."
+        temp=2
+      else
+        temp=$(echo "scale=1;$temp/10" | bc)
+      fi
+    elif [[ "${args[i]}" =~ 'w'[0-9]+ ]]; then
+      words="${args[i]//[^0-9]/}"
+      if (("$words" > 500)); then
+        echo "Maximum word count is 500."
+        echo "Resuming with this value..."
+        words=500
+      fi
+    elif [[ "${args[i]}" =~ 'h'[0-9]+ ]]; then
+      history="${args[i]//[^0-9]/}"
+      history=$(tail -n $((history*3)) < ~/.temp/last/ai-qna)
+      history=$(sed -z 's:\n:\\n:g' <<< "$history" | sed 's:\\n\\n:\\n:g')
+    else
+      tokens+="${args[i]} "
+    fi
+  done
+  toUse="${history}\nQ: ${tokens:0:-1}\nA: "
+  echo "$toUse"
+
+  request=$(curl -s 'https://api.openai.com/v1/engines/text-davinci-002/completions' \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $OPENAI_API_KEY" \
+    -d '{
+      "prompt": "Q: '"$toUse"'.\nA:",
+      "temperature": '"$temp"',
+      "max_tokens": '"$words"',
+      "top_p": 1,
+      "frequency_penalty": 0.0,
+      "presence_penalty": 0.0,
+      "stop": ["\n"]
+    }'
+  )
+
+  echo "$request"
+
+  output=$(echo "$request" | jq -r .choices[].text | tr -s '\n')
+  output="${output:1}"
+  echo -e "Q: ${tokens:0:-1}\nA: ${output}\n" >> ~/.temp/last/ai-chat
+  if [[ $(echo "$request" | jq -r .choices[].finish_reason) != 'stop' ]]; then
+    output="${output} // MAX WORDS REACHED"
+  else
+    echo "$output"
+  fi
 
 }
