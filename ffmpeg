@@ -23,3 +23,58 @@ addsub() {
   ffmpeg -i "$video" -i "$subtitles" -c copy -c:s mov_text "${video:0:-4}-subs.mp4"
 
 }
+
+rec() {
+
+  mkdir -p ~/Videos/ ~/Videos/Recorded
+
+  resolution=(2540 1080)
+  preset='-preset ultrafast'
+  format='-pix_fmt yuv420p'
+  fps='-framerate 30'
+  lib='-c:v libx264'
+  crf='-crf 30'
+  gq='-qp 20'
+
+  for ((i=0; i < ${#1}; i++)); do
+    case "${1:$i:1}" in
+      l) resolution=(1280 540); crf='-crf 35'; gq='-qp 10'; fps='-framerate 20'; echo low;;
+      n) resolution=(2540 1080); crf='-crf 30'; gq='-qp 10'; fps='-framerate 30'; echo normal;;
+      h) resolution=(3440 1440); crf='-crf 22'; gq='-qp 10'; fps='-framerate 60'; echo high;;
+      s) preset='-preset slow'; echo slow;;
+      e) echo efficient mode
+         if [[ ! "$1" =~ 'g' ]]; then
+           lib='-c:v libx265'
+         fi;;
+      g) if [[ "$1" =~ 'e' ]]; then
+           lib='-codec:v hevc_vaapi'
+         else
+           lib='-codec:v h264_vaapi'
+         fi
+         lib+=" -vf 'scale=${resolution[0]}x${resolution[1]},hwdownload,format=nv12' -f mpegts"
+#         lib+=" -vf 'deinterlace_vaapi=rate=field:auto=1,scale_vaapi=w=640:h=360,hwdownload,format=nv12' -f mpegts"
+         device='-hwaccel vaapi -hwaccel_device /dev/dri/renderD128 -hwaccel_output_format vaapi'
+         echo 'enabled gpu acceleration';;
+      *) echo
+         echo 'Usage : rec <l/n/h + s? + e? + g?>'
+         echo
+         echo 'QUALITY : l=low / n=normal / h=high (default : normal)'
+         echo 'ENCODING : e=efficient (default : compatibility)'
+         echo 'ENCODING : g=enable gpu (default : CPU)'
+         echo 'PRESET : s=slow (default : fast)'
+         echo
+         return;;
+    esac
+  done
+
+  if [[ "$1" =~ 'g' ]]; then
+    unset crf format preset resolution
+  else
+    resolution="-vf scale=${resolution[0]}:${resolution[1]}"
+    unset gq device
+  fi
+
+  ffmpeg -hide_banner -stats -loglevel warning $device -f x11grab $fps -i :0 $resolution $lib $crf $gq $preset $format -y ~/Videos/Recorded/$(date +%y-%m-%d-%H:%M:%S).mp4
+  echo "ffmpeg -hide_banner -stats -loglevel warning $device -f x11grab $fps -i :0 $resolution $lib $crf $gq $preset $format -y ~/Videos/Recorded/$(date +%y-%m-%d-%H:%M:%S).mp4"
+
+}
