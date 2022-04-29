@@ -2,6 +2,7 @@
 
 # initialisation
 ub='/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/ubuntu/root'
+mkdir -p /sdcard/Download/Shared
 
 # bulk rename
 ren() {
