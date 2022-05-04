@@ -17,10 +17,10 @@ n() {
   last=$(<~/.temp/last/nano)
   last="${last##*$'\n'}"
   if [[ -n "$create" ]]; then
-    nano "${args[@]}"
+    nano -m "${args[@]}"
   elif [[ -n "$file" ]]; then
     echo "$(readlink -f $file) ${validArgs[@]}" >> ~/.temp/last/nano
-    nano "${args[@]}"
+    nano -m "${args[@]}"
   elif [[ -n "$last" ]]; then
     toExec="nano $last ${validArgs[@]}"
     $toExec
