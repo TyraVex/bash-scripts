@@ -1,8 +1,10 @@
 #!/bin/bash
 
 # initialisation
-ub='/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/ubuntu/root'
-mkdir -p /sdcard/Download/Shared
+if [[ -d '/sdcard/Download' ]]; then
+  ub='/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/ubuntu/root'
+  mkdir -p /sdcard/Download/Shared
+fi
 
 # bulk rename
 ren() {
