@@ -7,11 +7,14 @@ PS1='\[\e[0;32m\]\w\[\e[0m\] '
 printf '\e[6 q'
 export HISTSIZE=100000
 export HISTFILESIZE=1000000
-shopt -s histappend
-export HISTCONTROL=ignoredups:erasedups
-export PROMPT_COMMAND="history -a;$PROMPT_COMMAND"
-shopt -s checkwinsize
-shopt -s globstar
+
+if [[ $(uname -o) == 'Andoid' ]]; then
+  shopt -s histappend
+  export HISTCONTROL=ignoredups:erasedups
+  export PROMPT_COMMAND="history -a;$PROMPT_COMMAND"
+  shopt -s checkwinsize
+  shopt -s globstar
+fi
 
 # aliases
 
