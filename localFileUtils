@@ -8,11 +8,15 @@ fi
 
 # bulk rename
 ren() {
-  readarray -t files <<< $(ls ~/scripts -1 --color=never)
+  readarray -t files <<< $(find)
   for ((i=0; i < "${#files[@]}"; i++)); do
     renammed=$(sed -E "s:$1:$2:g" <<< "${files[i]}")
     mv "${files[i]}" "$renammed" 2> /dev/null
   done
+}
+
+catall() {
+  find . -type f -exec cat {} +
 }
 
 # average time of command
