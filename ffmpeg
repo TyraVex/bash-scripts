@@ -78,3 +78,5 @@ rec() {
   echo "ffmpeg -hide_banner -stats -loglevel warning $device -f x11grab $fps -i :0 $resolution $lib $crf $gq $preset $format -y ~/Videos/Recorded/$(date +%y-%m-%d-%H:%M:%S).mp4"
 
 }
+
+# mkdir -p converted && readarray -t names <<< $(find -type f) && for ((i=0; i<${#names[@]}; i++)); do mv ${names[i]}-temp ffmpeg -i ${names[i]}-temp -q:v 5 -vf 'scale=if(gte(iw\,ih)\,min(2000\,iw)\,-2):if(lt(iw\,ih)\,min(2000\,ih)\,-2)' converted/$i.jpg; echo ${names[i]}; done
