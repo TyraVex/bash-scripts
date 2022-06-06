@@ -20,7 +20,7 @@ addsub() {
     return
   fi
 
-  ffmpeg -i "$video" -i "$subtitles" -c copy -c:s mov_text "${video:0:-4}-subs.mp4"
+  ffmpeg -i "$video" -i "$subtitles" -c copy -c:s mov_text -sub_charenc UTF-8 "${video:0:-4}-subs.mp4"
 
 }
 
@@ -80,3 +80,17 @@ rec() {
 }
 
 # mkdir -p converted && readarray -t names <<< $(find -type f) && for ((i=0; i<${#names[@]}; i++)); do mv ${names[i]}-temp ffmpeg -i ${names[i]}-temp -q:v 5 -vf 'scale=if(gte(iw\,ih)\,min(2000\,iw)\,-2):if(lt(iw\,ih)\,min(2000\,ih)\,-2)' converted/$i.jpg; echo ${names[i]}; done
+
+compressjpg() {
+
+  readarray -t files <<< $(find -type f | grep -v 'ffmpeg')
+  for ((i=0; i < "${#files[@]}"; i++)); do
+    ffmpeg -loglevel error -y -i "${files[i]}" \
+    -q:v "$2" -preset placebo \
+    -vf 'scale=if(gte(iw\,ih)\,min('"$1"'\,iw)\,-2):if(lt(iw\,ih)\,min('"$1"'\,ih)\,-2)' \
+    "${files[i]%.*}-ffmpeg.jpg"
+    echo -ne "\r$i/${#files[@]} "
+  done
+  echo -ne '\e[2K\r\e[32mDone\e[0m\n'
+
+}
