@@ -39,12 +39,12 @@ vp() {
   $(play "$*" > /dev/null &)
 }
 
-# launch video via VLC
+# launch video
 startvideo() {
   $(am start --user 0 -a android.intent.action.VIEW -t video/mpeg -d "$1" > /dev/null 2>&1 &)
 }
 
-# play music via VLC
+# play music
 startaudio() {
   $(am start --user 0 -a android.intent.action.VIEW -t audio/wav -d "$1" > /dev/null 2>&1 &)
 }
