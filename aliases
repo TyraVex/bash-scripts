@@ -43,7 +43,7 @@ w() { chmod +x "$1"; }
 cs() { cd "$1" && ls; }
 ln() { cat "$1" | wc -l; }
 apti() { apt install "$@"; }
-path() { readlink -f "$1"; }
 diff() { sort "$@" | uniq -u; }
 uln() { sort "$1" | uniq -u | wc -l; }
 print() { cat "$1" | fold -sw "$COLUMNS"; }
+path() { readlink -f "$1" | sed 's:\/data\/data\/com\.termux\/files\/home:~:'; }
