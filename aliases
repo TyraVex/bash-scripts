@@ -34,6 +34,8 @@ alias ccc='rm /data/data/com.termux/files/usr/tmp/* -rf'
 alias u='apt update; apt upgrade; apt autoremove'
 alias ls='ls --color --group-directories-first -t -X'
 alias la='ls -A --color --group-directories-first -t -X'
+alias packages="adb shell pm list packages | awk  -F : '{print \$2}'"
+
 
 # functions
 
@@ -47,3 +49,4 @@ diff() { sort "$@" | uniq -u; }
 uln() { sort "$1" | uniq -u | wc -l; }
 print() { cat "$1" | fold -sw "$COLUMNS"; }
 path() { readlink -f "$1" | sed 's:\/data\/data\/com\.termux\/files\/home:~:'; }
+unins() { adb shell pm uninstall -k --user 0 "$@"; }
