@@ -24,7 +24,8 @@ vid() {
   cd /sdcard/Download/Shared/
   if [[ "$1" == *"."* ]]; then
     yt-dlp "$1" --extractor-args youtube:player_client=android \
-     --throttled-rate 100K -o "%(title)s.%(ext)s"
+     --throttled-rate 100K -o "%(title)s.%(ext)s" \
+     -f 'best[filesize<300M]'
   else
     yt-dlp ytsearch:"$*" -o "%(title)s.%(ext)s"
   fi
@@ -53,6 +54,21 @@ ovid() {
 
 }
 
+# streamcenter.cc downloader
+
+streamcenter() {
+
+  readarray -t links <<< $(curl -L "$*" | grep -Po '(?<=<div data-url="/streamer/).+(?=" class="player">)')
+  for i in "${links[@]}"; do
+    link=$(echo "$i" | base64 -d)
+    echo -e "\e[33m$link\e[0m"
+    yt-dlp "$link"
+    page=$(curl -L "$link")
+    echo "$page" | grep '.mp4\|.avi\|.mkv\|.av1\|.vp9\|.vp8'
+    sleep 1
+  done
+
+}
 
 # tidal downloader (ARCHIVED)
 

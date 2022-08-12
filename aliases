@@ -49,4 +49,7 @@ diff() { sort "$@" | uniq -u; }
 uln() { sort "$1" | uniq -u | wc -l; }
 print() { cat "$1" | fold -sw "$COLUMNS"; }
 path() { readlink -f "$1" | sed 's:\/data\/data\/com\.termux\/files\/home:~:'; }
-unins() { adb shell pm uninstall -k --user 0 "$@"; }
+clone() { git clone "https://github.com/TyraVex/$1" --depth 1 "${@:2}"; }
+
+unins() { adb shell pm uninstall -k --user 0 "$1"; }
+reins() { adb shell cmd package install-existing "$1"; }

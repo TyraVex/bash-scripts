@@ -83,14 +83,79 @@ rec() {
 
 compressjpg() {
 
-  readarray -t files <<< $(find -type f | grep -v 'ffmpeg')
-  for ((i=0; i < "${#files[@]}"; i++)); do
-    ffmpeg -loglevel error -y -i "${files[i]}" \
-    -q:v "$2" -preset placebo \
-    -vf 'scale=if(gte(iw\,ih)\,min('"$1"'\,iw)\,-2):if(lt(iw\,ih)\,min('"$1"'\,ih)\,-2)' \
-    "${files[i]%.*}-ffmpeg.jpg"
-    echo -ne "\r$i/${#files[@]} "
+  echo
+  args=($@)
+  resolution=2000
+  quality=4
+  path=.
+  unset marker destination
+  for ((i=0; i < "${#args[@]}"; i++)); do
+    if [[ "${args[i]}${args[i+1]}" =~ '-resolution'[0-9]+|'-R'[0-9]+ ]]; then
+      resolution="${args[i+1]}"
+    elif [[ "${args[i]}${args[i+1]}" =~ '-quality'[0-9]+|'-Q'[0-9]+ ]]; then
+      quality="${args[i+1]}"
+      if (("$quality" > 31)); then
+        echo "Max quality is 31. Using this value."
+        quality=31
+      elif (("$quality" < 2)); then
+        echo "Min quality is 2. Using this value."
+        quality=2
+      fi
+    elif [[ "${args[i]}${args[i+1]}" =~ '-path'.+|'-P'.+ ]]; then
+      path="${args[i+1]}"
+      if [[ ! -d "$path" ]]; then
+        echo -e "\e[31mERROR : Path does not exist.\e[0m"
+        return
+      fi
+    elif [[ "${args[i]}${args[i+1]}" =~ '-destination'.+|'-D'.+ ]]; then
+      destination="${args[i+1]}"
+      if [[ "${destination: -1}" != '/' ]]; then
+        destination="$destination/"
+      fi
+      if [[ ! -d "$destination" ]]; then
+        echo -e '\e[33mWARNING : Destination does not exist.\e[0m'
+        read -p "Do you want to create it ? > " answer
+        if [[ "$answer" == 'y' ]]; then
+          mkdir -p "$destination"
+        else
+          echo
+          echo 'Abording...'
+          echo
+          return
+        fi
+      fi
+    elif [[ "${args[i]}" =~ '-help'|'-H' ]]; then
+      echo "USAGE : compressjpg <parameters>"
+      echo
+      echo 'Parameters :'
+      echo '  --help (-H) : display this help message'
+      echo '  --path (-P) : select input directory'
+      echo '  --destination (-D) : select output directory'
+      echo '  --quality (-Q) : specify jpg quality (2-31)'
+      echo '  --resolution (-R) : downscale results'
+      echo
+      return
+    fi
   done
-  echo -ne '\e[2K\r\e[32mDone\e[0m\n'
+  echo "R: $resolution - Q: $quality - P: $path - D: $destination"
+  echo
+  readarray -t files <<< $(find "$path" -type f | grep -v 'ffmpeg')
+  if [[ -z "$destination" ]]; then
+    marker="-ffmpeg"
+  fi
+  for ((i=0; i < "${#files[@]}"; i++)); do
+    if [[ -n $(file -i "${files[i]}" | grep image) ]]; then
+      outputName="${files[i]%.*}"
+      if [[ "${outputName:0:2}" == './' ]]; then
+        outputName="${outputName:2}"
+      fi
+      ffmpeg -loglevel error -y -i "${files[i]}" \
+      -q:v "$quality" -preset placebo \
+      -vf 'scale=if(gte(iw\,ih)\,min('"$resolution"'\,iw)\,-2):if(lt(iw\,ih)\,min('"$resolution"'\,ih)\,-2)' \
+      "$destination${outputName##*/}$marker.jpg"
+      echo -ne "\r$i/${#files[@]} "
+    fi
+  done
+  echo -ne '\e[2K\r\e[32mDone\e[0m\n\n'
 
 }
