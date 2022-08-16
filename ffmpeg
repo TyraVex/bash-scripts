@@ -81,33 +81,40 @@ rec() {
 
 # mkdir -p converted && readarray -t names <<< $(find -type f) && for ((i=0; i<${#names[@]}; i++)); do mv ${names[i]}-temp ffmpeg -i ${names[i]}-temp -q:v 5 -vf 'scale=if(gte(iw\,ih)\,min(2000\,iw)\,-2):if(lt(iw\,ih)\,min(2000\,ih)\,-2)' converted/$i.jpg; echo ${names[i]}; done
 
-compressjpg() {
+compress() {
 
   echo
   args=($@)
   resolution=2000
-  quality=4
+  imageQuality=4
+  videoQuality=30
   path=.
-  unset marker destination
+  unset marker destination overwrite
   for ((i=0; i < "${#args[@]}"; i++)); do
-    if [[ "${args[i]}${args[i+1]}" =~ '-resolution'[0-9]+|'-R'[0-9]+ ]]; then
+    if [[ "${args[i]}${args[i+1]}" =~ '--resolution'[0-9]+|'-R'[0-9]+ ]]; then
       resolution="${args[i+1]}"
-    elif [[ "${args[i]}${args[i+1]}" =~ '-quality'[0-9]+|'-Q'[0-9]+ ]]; then
-      quality="${args[i+1]}"
-      if (("$quality" > 31)); then
-        echo "Max quality is 31. Using this value."
-        quality=31
-      elif (("$quality" < 2)); then
-        echo "Min quality is 2. Using this value."
-        quality=2
+    elif [[ "${args[i]}${args[i+1]}" =~ '--image-quality'[0-9]+|'-IQ'[0-9]+ ]]; then
+      imageQuality="${args[i+1]}"
+      if (("$imageQuality" > 31)); then
+        echo "Max image quality is 31. Using this value."
+        imageQuality=31
+      elif (("$imageQuality" < 2)); then
+        echo "Min image quality is 2. Using this value."
+        imageQuality=2
       fi
-    elif [[ "${args[i]}${args[i+1]}" =~ '-path'.+|'-P'.+ ]]; then
+    elif [[ "${args[i]}${args[i+1]}" =~ '--video-quality'[0-9]+|'-VQ'[0-9]+ ]]; then
+      videoQuality="${args[i+1]}"
+      if (("$videoQuality" > 63)); then
+        echo "Max video quality is 63. Using this value."
+        videoQuality=63
+      fi
+    elif [[ "${args[i]}${args[i+1]}" =~ '--path'.+|'-P'.+ ]]; then
       path="${args[i+1]}"
       if [[ ! -d "$path" ]]; then
-        echo -e "\e[31mERROR : Path does not exist.\e[0m"
+        echo -e "\e[31mERROR : Path does not exist.\e[0m\n"
         return
       fi
-    elif [[ "${args[i]}${args[i+1]}" =~ '-destination'.+|'-D'.+ ]]; then
+    elif [[ "${args[i]}${args[i+1]}" =~ '--destination'.+|'-D'.+ ]]; then
       destination="${args[i+1]}"
       if [[ "${destination: -1}" != '/' ]]; then
         destination="$destination/"
@@ -117,6 +124,7 @@ compressjpg() {
         read -p "Do you want to create it ? > " answer
         if [[ "$answer" == 'y' ]]; then
           mkdir -p "$destination"
+          echo
         else
           echo
           echo 'Abording...'
@@ -124,37 +132,51 @@ compressjpg() {
           return
         fi
       fi
+    elif [[ "${args[i]}${args[i+1]}" =~ '--overwrite'.+|'-O'.+ ]]; then
+      if [[ "${args[i+1]}" == 'y' ]]; then
+        overwrite="-y"
+      elif [[ "${args[i+1]}" == 'n' ]]; then
+        overwrite="-n"
+      fi
     elif [[ "${args[i]}" =~ '-help'|'-H' ]]; then
-      echo "USAGE : compressjpg <parameters>"
+      echo "USAGE : compress <parameters>"
       echo
       echo 'Parameters :'
       echo '  --help (-H) : display this help message'
+      echo '  --overwrite (-O) : overwrite files (y/n)'
       echo '  --path (-P) : select input directory'
       echo '  --destination (-D) : select output directory'
-      echo '  --quality (-Q) : specify jpg quality (2-31)'
+      echo '  --image-quality (-IQ) : specify jpg quality (2-31)'
+      echo '  --video-quality (-VQ) : specify h264 quality (0-63)'
       echo '  --resolution (-R) : downscale results'
       echo
       return
     fi
   done
-  echo "R: $resolution - Q: $quality - P: $path - D: $destination"
+  echo "R: $resolution - IQ: $imageQuality - VQ : $videoQuality - P: $path - D: $destination"
   echo
+  trap 'return' 2 3
   readarray -t files <<< $(find "$path" -type f | grep -v 'ffmpeg')
   if [[ -z "$destination" ]]; then
     marker="-ffmpeg"
   fi
   for ((i=0; i < "${#files[@]}"; i++)); do
+    outputName="${files[i]%.*}"
+    if [[ "${outputName:0:2}" == './' ]]; then
+      outputName="${outputName:2}"
+    fi
     if [[ -n $(file -i "${files[i]}" | grep image) ]]; then
-      outputName="${files[i]%.*}"
-      if [[ "${outputName:0:2}" == './' ]]; then
-        outputName="${outputName:2}"
-      fi
-      ffmpeg -loglevel error -y -i "${files[i]}" \
-      -q:v "$quality" -preset placebo \
+      ffmpeg -loglevel error $overwrite -i "${files[i]}" \
+      -q:v "$imageQuality" -preset placebo \
       -vf 'scale=if(gte(iw\,ih)\,min('"$resolution"'\,iw)\,-2):if(lt(iw\,ih)\,min('"$resolution"'\,ih)\,-2)' \
       "$destination${outputName##*/}$marker.jpg"
-      echo -ne "\r$i/${#files[@]} "
+    elif [[ -n $(file -i "${files[i]}" | grep video) ]]; then
+      ffmpeg -loglevel error -stats $overwrite -i "${files[i]}" \
+      -crf "$videoQuality" -preset slow -c:v libx264 -c:a aac -b:a 96k \
+      -vf 'scale=if(gte(iw\,ih)\,min('"$resolution"'\,iw)\,-2):if(lt(iw\,ih)\,min('"$resolution"'\,ih)\,-2)' \
+      "$destination${outputName##*/}$marker.mp4"
     fi
+    echo -ne "\r$i/${#files[@]} "
   done
   echo -ne '\e[2K\r\e[32mDone\e[0m\n\n'
 
