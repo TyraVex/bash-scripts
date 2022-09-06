@@ -89,7 +89,7 @@ getmv() {
   fi
 }
 
-# extend m3u file
+# extend m3u file (ANDROID)
 extendm3u() {
   unset allM3U regularM3U rawM3U
   readarray -t allM3U <<< $(find /sdcard/Music/ -type f -name "*.m3u")
