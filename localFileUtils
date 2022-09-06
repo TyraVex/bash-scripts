@@ -88,3 +88,28 @@ getmv() {
     echo "Feature only supported on termux"
   fi
 }
+
+# extend m3u file
+extendm3u() {
+  unset allM3U regularM3U rawM3U
+  readarray -t allM3U <<< $(find /sdcard/Music/ -type f -name "*.m3u")
+  for i in "${allM3U[@]}"; do
+    if [[ $(head -n 1 "$i") != '#EXTM3U' ]]; then
+      m3uLocation="$(readlink -f $i)"
+      folderLocation="${m3uLocation%/*}"
+      outputLocation="$i"
+#      outputLocation="${i%.*}-extended.m3u"
+      readarray -t lines <<< $(egrep -o '.+\.opus|.+\.mp3|.+\.m4a|.+\.aac|.+\.3gp|.+\.wav' "$i")
+      echo "Extended $i (${#lines[@]} songs)"
+#      echo "Extended $i to $outputLocation (${#lines[@]} songs)"
+      rawM3U=('#EXTM3U')
+      for j in "${lines[@]}"; do
+        rawM3U+=("#EXTINF:-1,${j%.*}" "$folderLocation/$j")
+      done
+      printf '%s\n' "${rawM3U[@]}" > "$outputLocation"
+    fi
+  done
+  if [[ -z "${rawM3U[@]}" ]]; then
+    echo "No non-extended m3u files found"
+  fi
+}
